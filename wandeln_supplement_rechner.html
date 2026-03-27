@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wandeln · Supplement-Rechner</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, serif;
+  background: #0A1520;
+  color: #F0EAD6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px 40px;
+  overflow-y: auto;
+}
+
+.brand {
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: #C99400;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 11px;
+  color: #4A3A1A;
+  margin-bottom: 28px;
+  font-style: italic;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.card {
+  background: #0F1E2A;
+  border: 1px solid #1A2E3A;
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #C99400;
+  margin-bottom: 16px;
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #5A6A7A;
+  margin-bottom: 6px;
+}
+
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.opt-btn {
+  background: none;
+  border: 1px solid #1A2E3A;
+  color: #4A5A6A;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.opt-btn.active, .opt-btn:hover {
+  border-color: #C99400;
+  color: #C99400;
+}
+.opt-btn.danger.active {
+  border-color: #C04040;
+  color: #C04040;
+}
+
+.slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 3px;
+  border-radius: 3px;
+  background: #1A2E3A;
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #C99400;
+  cursor: pointer;
+}
+
+.slider-val {
+  font-size: 15px;
+  color: #C99400;
+  min-width: 50px;
+  text-align: right;
+}
+
+.calc-btn {
+  width: 100%;
+  max-width: 360px;
+  background: none;
+  border: 1.5px solid #C99400;
+  color: #C99400;
+  font-family: Georgia, serif;
+  font-size: 14px;
+  letter-spacing: 3px;
+  padding: 14px;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.calc-btn:hover { background: #C99400; color: #0A1520; }
+
+/* Results */
+.results {
+  width: 100%;
+  max-width: 360px;
+  display: none;
+}
+.results.visible { display: block; }
+
+.result-title {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #1D7A6B;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.supp-card {
+  background: #0F1E2A;
+  border-left: 3px solid #1D7A6B;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.supp-card.warn { border-left-color: #C99400; }
+.supp-card.alert { border-left-color: #C04040; }
+
+.supp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.supp-name {
+  font-size: 13px;
+  font-weight: bold;
+  color: #F0EAD6;
+  letter-spacing: 1px;
+}
+
+.supp-dose {
+  font-size: 16px;
+  color: #C99400;
+  letter-spacing: 1px;
+}
+
+.supp-form {
+  font-size: 11px;
+  color: #3A5A5A;
+  margin-bottom: 4px;
+  font-style: italic;
+}
+
+.supp-note {
+  font-size: 11px;
+  color: #4A5A6A;
+  line-height: 1.7;
+}
+
+.warn-box {
+  background: #1A0A0A;
+  border: 1px solid #C04040;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  color: #C08080;
+  line-height: 1.8;
+}
+
+.warn-box strong { color: #E04040; }
+
+.disclaimer {
+  font-size: 10px;
+  color: #2A3A4A;
+  text-align: center;
+  line-height: 1.8;
+  margin-top: 16px;
+  font-style: italic;
+  max-width: 360px;
+}
+
+.src {
+  font-size: 10px;
+  color: #2A3A4A;
+  font-style: italic;
+  margin-top: 4px;
+}
+</style>
+</head>
+<body>
+
+<div class="brand">Wandeln</div>
+<div class="subtitle">Supplement-Rechner · Protokoll #2 · DGE / Funktionalmedizin</div>
+
+<!-- Input card -->
+<div class="card">
+  <div class="card-title">Dein Profil</div>
+
+  <div class="field">
+    <label>Geschlecht</label>
+    <div class="btn-group" id="genderGroup">
+      <button class="opt-btn active" onclick="select('gender','m',this)">Männlich</button>
+      <button class="opt-btn" onclick="select('gender','f',this)">Weiblich</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Gewicht</label>
+    <div class="slider-wrap">
+      <input type="range" id="weightSlider" min="45" max="140" value="75"
+             oninput="document.getElementById('weightVal').textContent=this.value+'kg'">
+      <div class="slider-val" id="weightVal">75 kg</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Alter</label>
+    <div class="btn-group" id="ageGroup">
+      <button class="opt-btn" onclick="select('age','teen',this)">14–24</button>
+      <button class="opt-btn active" onclick="select('age','adult',this)">25–50</button>
+      <button class="opt-btn" onclick="select('age','senior',this)">51+</button>
+    </div>
+  </div>
+
+  <div class="field" id="cycleField" style="display:none">
+    <label>Zyklusphase</label>
+    <div class="btn-group" id="cycleGroup">
+      <button class="opt-btn active" onclick="select('cycle','follikel',this)">Follikel (Tag 1–14)</button>
+      <button class="opt-btn" onclick="select('cycle','luteal',this)">Luteal (Tag 15–28)</button>
+      <button class="opt-btn danger" onclick="select('cycle','pms',this)">PMS</button>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Lebenssituation (mehrere möglich)</label>
+    <div class="btn-group" id="situGroup">
+      <button class="opt-btn" onclick="toggle('vegan',this)">Vegan</button>
+      <button class="opt-btn" onclick="toggle('sport',this)">Viel Sport</button>
+      <button class="opt-btn" onclick="toggle('stress',this)">Stress / CPTSD</button>
+      <button class="opt-btn" onclick="toggle('pregnant',this)">Schwanger</button>
+      <button class="opt-btn" onclick="toggle('neuro',this)">Neuro / Müdigkeit</button>
+    </div>
+  </div>
+
+</div>
+
+<button class="calc-btn" onclick="calculate()">Berechnen</button>
+
+<div class="results" id="results">
+  <div class="result-title">Deine Empfehlungen</div>
+  <div id="warnZone"></div>
+  <div id="suppZone"></div>
+  <div class="disclaimer">
+    Kein Ersatz für ärztlichen Rat. DGE-Schätzwerte + funktionalmedizinische Praxis.<br>
+    Bitte Rücksprache mit Arzt bei Erkrankungen oder Medikamenteneinnahme.<br><br>
+    Quellen: DGE Referenzwerte 2021 · EFSA 2015 · BfR 2022 ·<br>
+    Holick MF — Vitamin D. NEJM 2007 · Calder PC — Omega-3. Nutrients 2017
+  </div>
+</div>
+
+<script>
+var profile = {
+  gender: 'm',
+  age: 'adult',
+  cycle: 'follikel',
+  weight: 75,
+  vegan: false,
+  sport: false,
+  stress: false,
+  pregnant: false,
+  neuro: false
+};
+
+function select(key, val, el) {
+  profile[key] = val;
+  var group = el.parentElement;
+  var btns = group.querySelectorAll('.opt-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  el.classList.add('active');
+  if (key === 'gender') {
+    document.getElementById('cycleField').style.display = val === 'f' ? 'block' : 'none';
+    if (val === 'f') profile.cycle = 'follikel';
+  }
+}
+
+function toggle(key, el) {
+  profile[key] = !profile[key];
+  el.classList.toggle('active', profile[key]);
+}
+
+document.getElementById('weightSlider').addEventListener('input', function() {
+  profile.weight = parseInt(this.value);
+});
+
+function calculate() {
+  profile.weight = parseInt(document.getElementById('weightSlider').value);
+
+  var warns = [];
+  var supps = [];
+  var w = profile.weight;
+  var female = profile.gender === 'f';
+  var senior = profile.age === 'senior';
+  var teen = profile.age === 'teen';
+
+  // ── WARNINGS ─────────────────────────────────────────────
+  if (female && profile.cycle === 'luteal') {
+    warns.push('<strong>Achtung: Lutealphase (Tag 15–28)</strong><br>Intermittent Fasting in dieser Zyklusphase erhöht Cortisol und kann den Zyklus stören. Pause empfohlen. Magnesium in dieser Phase besonders wichtig gegen PMS-Symptome.');
+  }
+  if (female && profile.cycle === 'pms') {
+    warns.push('<strong>PMS-Phase:</strong> Erhöhter Bedarf an Magnesium (200–400 mg) und B6. IF komplett pausieren. Kein R-ALA nüchtern. Omega-3 weiterführen — entzündungshemmend direkt relevant.');
+  }
+  if (profile.pregnant) {
+    warns.push('<strong>Schwangerschaft:</strong> Alle Dosierungen mit Gynäkologin abstimmen. R-ALA und hohe Vit-D-Dosen in der Schwangerschaft nicht ohne ärztliche Freigabe.');
+  }
+
+  // ── MAGNESIUM ────────────────────────────────────────────
+  var mgBase = female ? 300 : 350;
+  if (teen && !female) mgBase = 400;
+  // Functional: 4-6 mg/kg
+  var mgFunct = Math.round(w * 5 / 10) * 10;
+  mgFunct = Math.min(mgFunct, 450);
+  var mgSupp = Math.max(mgFunct - 150, 100); // assuming ~150mg from food
+  mgSupp = Math.min(mgSupp, 250); // BfR limit for supplements
+
+  var mgNotes = [];
+  if (female && (profile.cycle === 'pms' || profile.cycle === 'luteal')) {
+    mgNotes.push('PMS: 200–400 mg täglich, ab Tag 15');
+  }
+  if (profile.sport) mgNotes.push('Sport erhöht Verlust über Schweiß — obere Grenze nutzen');
+  if (profile.stress) mgNotes.push('Cortisol erhöht Mg-Ausscheidung — regelmäßig ergänzen');
+
+  supps.push({
+    name: 'Magnesium',
+    dose: mgSupp + ' mg/Tag',
+    form: 'Bisglycinat (beste Bioverfügbarkeit) · abends',
+    note: 'DGE: ' + mgBase + ' mg Gesamtbedarf · Funktionalmedizin: ' + mgFunct + ' mg/Tag (' + Math.round(w * 5) + ' mg/kg × 0,8). Max. 250 mg über NEM (BfR). Verbleibende Menge über Lebensmittel (Kürbiskerne, dunkle Schokolade, Spinat).' + (mgNotes.length ? '<br>⚠ ' + mgNotes.join(' · ') : ''),
+    src: 'DGE 2021 · BfR 2022',
+    type: 'normal'
+  });
+
+  // ── OMEGA-3 ──────────────────────────────────────────────
+  var omegaDose = '2 g EPA+DHA/Tag';
+  var omegaNote = 'EPA: entzündungshemmend (Neuroinflammation, Cortisol). DHA: Membranfluidität der Neuronen. Mindestens 60% EPA-Anteil wählen.';
+  if (profile.vegan) {
+    omegaNote += '<br>Vegan: Algenöl (direkte DHA+EPA-Quelle) statt Fischöl — ALA aus Leinöl wird nur zu ~5% umgewandelt.';
+    omegaDose = '1–2 g DHA+EPA/Tag (Algenöl)';
+  }
+  if (profile.stress || profile.neuro) omegaDose = '2–3 g EPA+DHA/Tag';
+  if (female && profile.cycle === 'pms') omegaNote += '<br>PMS: EPA reduziert Prostaglandin-vermittelte Schmerzen direkt.';
+
+  supps.push({
+    name: 'Omega-3 (EPA+DHA)',
+    dose: omegaDose,
+    form: profile.vegan ? 'Algenöl · mit Mahlzeit' : 'Triglycerid-Form (nicht Ethylester) · mit Mahlzeit',
+    note: omegaNote,
+    src: 'Calder PC — Nutrients 2017',
+    type: 'normal'
+  });
+
+  // ── VITAMIN D3 + K2 ──────────────────────────────────────
+  var vitDDose = 2000;
+  if (senior) vitDDose = 2500;
+  if (profile.vegan) vitDDose += 500;
+  if (profile.stress) vitDDose += 500;
+  var k2Dose = vitDDose >= 2500 ? 180 : 100;
+
+  var vitDNote = 'D3 ohne K2 kann Kalzium falsch einlagern (Arterien statt Knochen). Immer kombiniert nehmen. Zielwert 25-OH-D im Blut: 40–60 ng/ml — Labor empfohlen.';
+  if (profile.vegan) vitDNote += '<br>Vegan: D3 aus Flechten (Lichen) wählen — identisch wirksam.';
+  if (senior) vitDNote += '<br>Ab 51: erhöhter Bedarf, da Hautsynthese stark abnimmt.';
+
+  supps.push({
+    name: 'Vitamin D3 + K2',
+    dose: vitDDose + ' IE D3 + ' + k2Dose + ' µg K2/Tag',
+    form: 'D3 als Cholecalciferol · K2 als MK-7 · mit fetthaltiger Mahlzeit',
+    note: vitDNote,
+    src: 'Holick MF — NEJM 2007 · DGE 2021',
+    type: 'normal'
+  });
+
+  // ── L-CARNITIN ───────────────────────────────────────────
+  var carniType = 'warn';
+  var carniDose, carniNote;
+
+  if (profile.vegan) {
+    carniDose = '500–1000 mg/Tag';
+    carniNote = 'Veganer sind fast immer defizitär — Carnitin kommt ausschließlich aus tierischen Quellen (Fleisch, Milch). Kritisch für Fettstoffwechsel und mitochondriale Energie.';
+    carniType = 'alert';
+  } else if (profile.neuro || profile.stress) {
+    carniDose = '500 mg Acetyl-L-Carnitin/Tag';
+    carniNote = 'Acetyl-L-Carnitin (ALCAR) überquert Blut-Hirn-Schranke — neuroprotektiv, verbessert mitochondriale Funktion bei Erschöpfung und kognitiver Fatigue.';
+  } else if (profile.sport) {
+    carniDose = '1000–2000 mg/Tag';
+    carniNote = 'Sport erhöht Carnitin-Umsatz. Vor dem Training mit Kohlenhydraten für optimale Aufnahme.';
+  } else {
+    carniDose = 'Optional: 500 mg/Tag';
+    carniNote = 'Bei ausgewogener Ernährung mit Fleisch meist ausreichend gedeckt. Bei Müdigkeit oder Muskelkrämpfen trotzdem testen.';
+    carniType = 'normal';
+  }
+
+  supps.push({
+    name: 'L-Carnitin' + (profile.neuro || profile.stress ? ' (ALCAR)' : ''),
+    dose: carniDose,
+    form: 'Morgens oder vor dem Training · nüchtern oder mit Kohlenhydraten',
+    note: carniNote,
+    src: 'Pekala J et al. — Nutrients 2011',
+    type: carniType
+  });
+
+  // ── R-ALA (Alpha-Liponsäure) ──────────────────────────────
+  var alaType = 'normal';
+  var alaDose, alaNote;
+
+  if (profile.vegan) {
+    alaDose = '100–300 mg R-ALA/Tag';
+    alaNote = 'Veganer haben deutlich niedrigere ALA-Spiegel. R-ALA (rechtsdrehend) ist 10× wirksamer als S-ALA oder Razemat. Wichtig: NUR natürlich extrahiertes R-ALA (aus Lebensmitteln/Pflanzen) verwenden.';
+    alaType = 'warn';
+  } else if (profile.neuro || profile.stress) {
+    alaDose = '100–200 mg R-ALA/Tag';
+    alaNote = 'Universelles Antioxidans — schützt Mitochondrien, regeneriert Glutathion, Vit C und E. Bei CPTSD und Stressbelastung besonders relevant.';
+  } else {
+    alaDose = '50–100 mg R-ALA/Tag';
+    alaNote = 'Erhaltungsdosis. Mehr ist hier nicht besser — R-ALA senkt Blutzucker, bei Untergewicht oder Hypoglykämie-Neigung vorsichtig dosieren.';
+  }
+
+  alaNote += '<br><strong style="color:#C04040">Wichtig: R-Form, nicht Razemat.</strong> Günstiges ALA ist oft ein Razemat (50% R + 50% S-ALA). Die S-Form ist biologisch inaktiv und kann die Wirkung der R-Form abschwächen. Nur reines R-ALA kaufen — auf Deklaration achten.';
+  if (female && profile.cycle === 'pms') alaNote += '<br>PMS: Nicht nüchtern einnehmen.';
+  if (profile.pregnant) { alaDose = '— pausieren'; alaNote = 'Schwangerschaft: R-ALA bis zur Abklärung mit Arzt pausieren.'; alaType = 'alert'; }
+
+  supps.push({
+    name: 'R-Alpha-Liponsäure',
+    dose: alaDose,
+    form: 'R-ALA (nicht Razemat) · nüchtern oder 30 min vor Mahlzeit · morgens',
+    note: alaNote,
+    src: 'Ziegler D et al. — Diabetes Care 2006',
+    type: alaType
+  });
+
+  // ── RENDER ───────────────────────────────────────────────
+  var warnHtml = '';
+  for (var i = 0; i < warns.length; i++) {
+    warnHtml += '<div class="warn-box">' + warns[i] + '</div>';
+  }
+
+  var suppHtml = '';
+  for (var j = 0; j < supps.length; j++) {
+    var s = supps[j];
+    suppHtml += '<div class="supp-card ' + s.type + '">' +
+      '<div class="supp-header">' +
+      '<div class="supp-name">' + s.name + '</div>' +
+      '<div class="supp-dose">' + s.dose + '</div>' +
+      '</div>' +
+      '<div class="supp-form">' + s.form + '</div>' +
+      '<div class="supp-note">' + s.note + '</div>' +
+      '<div class="src">Quelle: ' + s.src + '</div>' +
+      '</div>';
+  }
+
+  document.getElementById('warnZone').innerHTML = warnHtml;
+  document.getElementById('suppZone').innerHTML = suppHtml;
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
