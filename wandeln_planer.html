@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wandeln · Protokoll-Planer</title>
+<style>
+:root {
+  --navy: #0A1520;
+  --navy2: #0F1E2A;
+  --navy3: #1A2E3A;
+  --gold: #C99400;
+  --gold-light: #E8B830;
+  --teal: #1D7A6B;
+  --teal-light: #4DB8A8;
+  --linen: #F0EAD6;
+  --muted: #8A7A5A;
+  --dim: #3A4A5A;
+  --warn: #C04040;
+  --warn-bg: #1A0808;
+  --green: #2D7D46;
+  --green-bg: #0A1A0F;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, serif;
+  background: var(--navy);
+  color: var(--linen);
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+/* ── HEADER ─────────────────────────────────── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--navy3);
+}
+
+.brand-col { display: flex; flex-direction: column; }
+.brand { font-size: 11px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; }
+.brand-sub { font-size: 10px; color: var(--dim); font-style: italic; letter-spacing: 1px; margin-top: 2px; }
+
+.week-nav { display: flex; align-items: center; gap: 10px; }
+.week-nav button {
+  background: none; border: 1px solid var(--navy3); color: var(--muted);
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px;
+  transition: all 0.2s;
+}
+.week-nav button:hover { border-color: var(--gold); color: var(--gold); }
+.week-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; white-space: nowrap; }
+
+/* ── TABS ────────────────────────────────────── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--navy3);
+  padding: 0 20px;
+}
+
+.tab {
+  background: none; border: none; cursor: pointer;
+  font-family: Georgia, serif; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--dim); padding: 10px 14px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab:hover { color: var(--muted); }
+
+/* ── PANELS ──────────────────────────────────── */
+.panel { display: none; padding: 16px 20px 40px; }
+.panel.active { display: block; }
+
+/* ── WEEK VIEW ───────────────────────────────── */
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.day-col {
+  background: var(--navy2);
+  border: 1px solid var(--navy3);
+  border-radius: 8px;
+  padding: 10px 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 120px;
+}
+.day-col:hover { border-color: var(--teal); }
+.day-col.today { border-color: var(--gold); }
+.day-col.selected { border-color: var(--teal); background: #0D1E2A; }
+.day-col.fasting { border-top: 3px solid var(--warn); }
+
+.day-name {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--dim); text-align: center; margin-bottom: 4px;
+}
+.day-num {
+  font-size: 18px; text-align: center; color: var(--linen);
+  margin-bottom: 8px; line-height: 1;
+}
+.day-col.today .day-num { color: var(--gold); }
+
+.progress-ring {
+  display: flex; justify-content: center; margin-bottom: 6px;
+}
+.progress-ring svg { width: 36px; height: 36px; }
+
+.day-badges {
+  display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;
+}
+.badge {
+  font-size: 9px; padding: 1px 4px; border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+.badge.walk { background: #0A2A1A; color: var(--teal-light); }
+.badge.fast { background: var(--warn-bg); color: #E08080; }
+.badge.mood { background: #1A1A0A; color: var(--gold); }
+
+/* ── WEEKLY GOALS ────────────────────────────── */
+.goals-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.goal-card {
+  background: var(--navy2);
+  border: 1px solid var(--navy3);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+.goal-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+.goal-val { font-size: 24px; color: var(--teal-light); }
+.goal-target { font-size: 10px; color: var(--dim); margin-top: 2px; }
+
+.mood-chart {
+  background: var(--navy2);
+  border: 1px solid var(--navy3);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.chart-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 40px; }
+.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.chart-bar { width: 100%; border-radius: 2px 2px 0 0; background: var(--navy3); transition: height 0.3s; min-height: 2px; }
+.chart-day-lbl { font-size: 8px; color: var(--dim); letter-spacing: 1px; }
+
+/* ── TOOLS ROW ───────────────────────────────── */
+.tools-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;
+}
+.tool-link {
+  background: none; border: 1px solid var(--navy3);
+  color: var(--teal); font-family: Georgia, serif; font-size: 11px;
+  letter-spacing: 1px; padding: 7px 14px; border-radius: 20px;
+  cursor: pointer; text-decoration: none; transition: all 0.2s;
+  display: inline-block;
+}
+.tool-link:hover { border-color: var(--teal); background: #0A1A16; }
+
+/* ── DAY VIEW ────────────────────────────────── */
+.day-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+}
+.day-title { font-size: 20px; color: var(--linen); letter-spacing: 1px; }
+.day-date { font-size: 11px; color: var(--muted); font-style: italic; }
+
+.fasting-banner {
+  background: var(--warn-bg); border: 1px solid #C04040;
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; color: #E08080; margin-bottom: 14px;
+  line-height: 1.7;
+}
+.fasting-banner strong { color: var(--warn); }
+
+.section-title {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px; margin-top: 18px;
+  padding-bottom: 4px; border-bottom: 1px solid var(--navy3);
+}
+.section-title:first-of-type { margin-top: 0; }
+
+.check-list { display: flex; flex-direction: column; gap: 6px; }
+
+.check-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--navy2); border: 1px solid var(--navy3);
+  border-radius: 8px; padding: 10px 14px;
+  cursor: pointer; transition: all 0.2s;
+  user-select: none;
+}
+.check-item:hover { border-color: var(--teal); }
+.check-item.checked { background: var(--green-bg); border-color: var(--green); }
+
+.check-box {
+  width: 20px; height: 20px; border-radius: 4px;
+  border: 1.5px solid var(--navy3); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; font-size: 12px;
+}
+.check-item.checked .check-box { background: var(--green); border-color: var(--green); }
+
+.check-text { flex: 1; }
+.check-name { font-size: 13px; color: var(--linen); }
+.check-sub { font-size: 10px; color: var(--dim); margin-top: 2px; font-style: italic; }
+.check-item.checked .check-name { color: var(--muted); text-decoration: line-through; }
+
+.check-link {
+  font-size: 10px; color: var(--teal); text-decoration: none;
+  border: 1px solid var(--teal); padding: 2px 8px;
+  border-radius: 10px; white-space: nowrap; flex-shrink: 0;
+}
+.check-link:hover { background: var(--teal); color: var(--navy); }
+
+/* Mood selector */
+.mood-selector {
+  display: flex; gap: 8px; align-items: center;
+  background: var(--navy2); border: 1px solid var(--navy3);
+  border-radius: 8px; padding: 12px 14px;
+}
+.mood-lbl { font-size: 12px; color: var(--muted); flex: 1; }
+.mood-stars { display: flex; gap: 4px; }
+.mood-star {
+  font-size: 20px; cursor: pointer; transition: transform 0.1s;
+  filter: grayscale(1) opacity(0.3);
+}
+.mood-star.lit { filter: none; }
+.mood-star:hover { transform: scale(1.2); }
+
+/* ── SHOPPING ────────────────────────────────── */
+.shop-intro {
+  font-size: 12px; color: var(--muted); margin-bottom: 16px;
+  line-height: 1.8; font-style: italic;
+}
+.shop-cat-title {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px; margin-top: 20px;
+  padding-bottom: 4px; border-bottom: 1px solid var(--navy3);
+}
+.shop-cat-title:first-of-type { margin-top: 0; }
+
+.shop-item {
+  background: var(--navy2); border: 1px solid var(--navy3);
+  border-radius: 8px; padding: 12px 14px; margin-bottom: 8px;
+}
+.shop-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.shop-name { font-size: 13px; color: var(--linen); }
+.shop-badge {
+  font-size: 9px; padding: 2px 7px; border-radius: 10px;
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.shop-badge.top { background: #0A1A0A; color: var(--teal-light); border: 1px solid var(--teal); }
+.shop-badge.good { background: #1A1A0A; color: var(--gold); border: 1px solid var(--gold); }
+.shop-badge.vegan { background: #0A1A14; color: #6AD4B0; border: 1px solid #2A8060; }
+
+.shop-brand { font-size: 12px; color: var(--teal-light); margin-bottom: 3px; }
+.shop-note { font-size: 11px; color: var(--dim); line-height: 1.7; }
+.shop-where { font-size: 10px; color: #2A4A3A; margin-top: 4px; font-style: italic; }
+
+.privacy-note {
+  font-size: 10px; color: var(--dim); text-align: center;
+  margin-top: 24px; line-height: 1.8; font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand-col">
+    <div class="brand">Wandeln</div>
+    <div class="brand-sub">Protokoll-Planer · metamorphousthai</div>
+  </div>
+  <div class="week-nav">
+    <button onclick="changeWeek(-1)">‹</button>
+    <div class="week-label" id="weekLabel">KW –</div>
+    <button onclick="changeWeek(1)">›</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('week',this)">Woche</button>
+  <button class="tab" onclick="showTab('day',this)">Heute</button>
+  <button class="tab" onclick="showTab('shop',this)">Einkauf</button>
+</div>
+
+<!-- ── WOCHE ──────────────────────────────────── -->
+<div class="panel active" id="panel-week">
+
+  <div class="week-grid" id="weekGrid"></div>
+
+  <div class="goals-row">
+    <div class="goal-card">
+      <div class="goal-label">Spaziergänge</div>
+      <div class="goal-val" id="walkCount">0</div>
+      <div class="goal-target">/ 3 Ziel (1h+)</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-label">Ø Stimmung</div>
+      <div class="goal-val" id="avgMood">—</div>
+      <div class="goal-target">diese Woche</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-label">Komplett-Tage</div>
+      <div class="goal-val" id="completeDays">0</div>
+      <div class="goal-target">/ 7 Tage</div>
+    </div>
+  </div>
+
+  <div class="mood-chart">
+    <div class="chart-title">Stimmungsverlauf</div>
+    <div class="chart-bars" id="moodChart"></div>
+  </div>
+
+  <div class="tools-row">
+    <a class="tool-link" href="wandeln_atem_timer.html" target="_blank">▷ 4-7-8 Atemübung</a>
+    <a class="tool-link" href="wandeln_coherent_breathing.html" target="_blank">▷ Coherent Breathing</a>
+    <a class="tool-link" href="wandeln_supplement_rechner.html" target="_blank">▷ Supplement-Rechner</a>
+  </div>
+
+
+  <div style="display:flex;justify-content:center;margin-top:4px">
+    <button class="tool-link" onclick="exportCSV()" style="border-color:#2D7D46;color:#4DB8A8">
+      ↓ Wochendaten exportieren (.csv)
+    </button>
+  </div>
+
+  <div class="privacy-note">🔒 Kein Tracking · Keine Cookies · Alle Daten lokal in deinem Browser gespeichert.</div>
+</div>
+
+<!-- ── TAG ───────────────────────────────────── -->
+<div class="panel" id="panel-day">
+  <div class="day-header">
+    <div>
+      <div class="day-title" id="dayTitle">Montag</div>
+      <div class="day-date" id="dayDate"></div>
+    </div>
+    <div class="mood-selector">
+      <div class="mood-lbl">Wie geht es dir?</div>
+      <div class="mood-stars" id="moodStars">
+        <span class="mood-star" onclick="setMood(1)">●</span>
+        <span class="mood-star" onclick="setMood(2)">●</span>
+        <span class="mood-star" onclick="setMood(3)">●</span>
+        <span class="mood-star" onclick="setMood(4)">●</span>
+        <span class="mood-star" onclick="setMood(5)">●</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="fastingBanner" style="display:none" class="fasting-banner">
+    <strong>Fastentag bis ~15:00</strong> · Mittwoch (Verrat) / Freitag (Kreuzigung) ·
+    9. Stunde jüdischer Zeit · Didache, 2. Jh.<br>
+    Wasser, Kräutertee, Zimt-Kaffee erlaubt · Supplemente nach 15 Uhr mit erster Mahlzeit.
+  </div>
+
+  <div id="checklistContainer"></div>
+</div>
+
+<!-- ── EINKAUF ────────────────────────────────── -->
+<div class="panel" id="panel-shop">
+  <div class="shop-intro">
+    Qualitätskriterien: natürliche oder bioidentische Moleküle · keine Nanopartikel-Füllstoffe
+    (Siliziumdioxid E551 vermeiden) · keine künstlichen Farbstoffe · dritte Parteien
+    getestet (COA verfügbar). Versand nach DE/AT möglich.
+  </div>
+
+  <div class="shop-cat-title">Magnesium</div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Magnesium Bisglycinat</div><span class="shop-badge top">Top</span></div>
+    <div class="shop-brand">Sunday Natural · Pure Encapsulations</div>
+    <div class="shop-note">Bisglycinat = beste Bioverfügbarkeit, kein Abführeffekt. Sunday Natural ist Berliner Marke mit COA. Kein Siliziumdioxid. 300–400mg abends.</div>
+    <div class="shop-where">→ sundaynatural.de · iherb.com · Versand DE/AT</div>
+  </div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Magnesium Malat</div><span class="shop-badge good">Morgens</span></div>
+    <div class="shop-brand">Dr. Mercola · NOW Foods</div>
+    <div class="shop-note">Malat-Form für Energie/Mitochondrien — ideal morgens. Malat (Apfelsäure) unterstützt Citratzyklus zusätzlich.</div>
+    <div class="shop-where">→ iherb.com · Versand DE/AT</div>
+  </div>
+
+  <div class="shop-cat-title">Omega-3</div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Fischöl — Triglycerid-Form</div><span class="shop-badge top">Top</span></div>
+    <div class="shop-brand">Norsan Omega-3 Total · Nordic Naturals</div>
+    <div class="shop-note">Norsan = deutsche Marke, IFOS-zertifiziert, Triglycerid-Form (nicht Ethylester = schlechtere Aufnahme). Flüssig oder Kapseln. 2g EPA+DHA täglich.</div>
+    <div class="shop-where">→ norsan.de · iherb.com · Amazon DE</div>
+  </div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Algenöl DHA+EPA</div><span class="shop-badge vegan">Vegan</span></div>
+    <div class="shop-brand">Naturtreu · Norsan Vegan</div>
+    <div class="shop-note">Einzige vegane Direktquelle (Algen = Ursprung der Fisch-Omega-3). ALA aus Leinöl wird nur ~5% umgewandelt — Algenöl ist Pflicht für Veganer.</div>
+    <div class="shop-where">→ naturtreu.de · norsan.de</div>
+  </div>
+
+  <div class="shop-cat-title">Vitamin D3 + K2</div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">D3 + K2 MK-7 Kombination</div><span class="shop-badge top">Top</span></div>
+    <div class="shop-brand">Sunday Natural · Fairvital</div>
+    <div class="shop-note">MK-7 (nicht MK-4) — längere Halbwertszeit, effektivere Kalziumsteuerung. Sunday Natural ohne Füllstoffe. Fairvital gut verfügbar in DE/AT. Mit fetthaltiger Mahlzeit.</div>
+    <div class="shop-where">→ sundaynatural.de · fairvital.de</div>
+  </div>
+
+  <div class="shop-cat-title">L-Theanin</div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">L-Theanin 200mg</div><span class="shop-badge good">Gut</span></div>
+    <div class="shop-brand">Sunday Natural · Jarrow Formulas</div>
+    <div class="shop-note">Natürlich aus Teeblättern extrahiert (Camellia sinensis) — nicht synthetisch. 200mg morgens mit Kaffee oder grünem Tee. Kein Siliziumdioxid prüfen.</div>
+    <div class="shop-where">→ sundaynatural.de · iherb.com</div>
+  </div>
+
+  <div class="shop-cat-title">R-Alpha-Liponsäure</div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Reines R-ALA (nicht Razemat)</div><span class="shop-badge top">Wichtig</span></div>
+    <div class="shop-brand">Sunday Natural R-ALA · Naturtreu</div>
+    <div class="shop-note">Nur R-Form kaufen — Razemat (50% S-ALA) schwächt Wirkung ab. Sunday Natural deklariert klar. 100–200mg nüchtern morgens. Blutzuckersenkend — nicht bei Unterzucker.</div>
+    <div class="shop-where">→ sundaynatural.de · naturtreu.de</div>
+  </div>
+
+  <div class="shop-cat-title">L-Carnitin / ALCAR</div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Acetyl-L-Carnitin (ALCAR)</div><span class="shop-badge good">Neuro</span></div>
+    <div class="shop-brand">NOW Foods · Life Extension</div>
+    <div class="shop-note">ALCAR (Acetylform) überquert Blut-Hirn-Schranke — für kognitive Energie und Mitochondrien. Pflicht für Veganer. 500mg morgens nüchtern oder vor Sport.</div>
+    <div class="shop-where">→ iherb.com · Versand DE/AT</div>
+  </div>
+
+  <div class="shop-cat-title">Grüner Drink / Chlorella</div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Chlorella Tabletten (Bruchalgen)</div><span class="shop-badge vegan">Detox</span></div>
+    <div class="shop-brand">Naturtreu · Sunday Natural</div>
+    <div class="shop-note">Aufgebrochene Zellwand (Cracked Cell Wall) = bessere Aufnahme. Schwermetall-Bindung, Chlorophyll, B12-Vorstufe. 5–10 Tabletten morgens mit Wasser.</div>
+    <div class="shop-where">→ naturtreu.de · sundaynatural.de</div>
+  </div>
+
+  <div class="shop-cat-title">Weitere Bausteine</div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Methylierter B-Komplex (P5P)</div><span class="shop-badge top">Täglich</span></div>
+    <div class="shop-brand">Thorne Basic B · Sunday Natural</div>
+    <div class="shop-note">Methylcobalamin + Methylfolat + P5P (aktives B6) — besonders bei MTHFR-Mutation wichtig. KEINE synthetische Cyanocobalamin-Form. Morgens.</div>
+    <div class="shop-where">→ sundaynatural.de · iherb.com (Thorne)</div>
+  </div>
+  <div class="shop-item">
+    <div class="shop-header"><div class="shop-name">Safran-Extrakt (Affron)</div><span class="shop-badge good">Stimmung</span></div>
+    <div class="shop-brand">Naturtreu Safran · Sunday Natural</div>
+    <div class="shop-note">Affron-zertifizierter Extrakt (30mg) — Serotonin-Reuptake-Hemmung, klinisch getestet gegen leichte Depression und PMS. Abends mit Baldrian kombinieren.</div>
+    <div class="shop-where">→ naturtreu.de · sundaynatural.de</div>
+  </div>
+
+  <div class="privacy-note">
+    🔒 Keine Affiliatelinks · Keine Kommissionen · Reine Qualitätsempfehlung.<br>
+    Alle Berechnungen und Daten lokal in deinem Browser — kein Tracking.
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+var TOOL_BASE = ''; // same folder on GitHub Pages
+
+var DAY_NAMES = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+var DAY_FULL  = ['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+var FASTING_DAYS = [2, 4]; // Wed=2, Fri=4 (0-indexed Mon=0)
+
+var CHECKLIST = [
+  { section: 'Morgen · Supplemente', items: [
+    { id: 'mg_malat',    name: 'Magnesium Malat',       sub: '150–200 mg · morgens nüchtern oder mit Frühstück' },
+    { id: 'theanin',     name: 'L-Theanin',             sub: '200 mg · mit erstem Kaffee oder Grüntee' },
+    { id: 'bkomp',       name: 'B-Komplex (methyliert)', sub: 'P5P-Form · morgens mit Mahlzeit' },
+    { id: 'd3k2',        name: 'Vitamin D3 + K2',        sub: '2000 IE D3 + 100 µg MK-7 · mit fetthaltiger Mahlzeit' },
+    { id: 'chlorella',   name: 'Grüner Drink / Chlorella', sub: '5–10 Tabletten oder 1 TL Pulver · vor Frühstück' },
+  ]},
+  { section: 'Morgen · Gewohnheiten', items: [
+    { id: 'pray_am',     name: 'Morgengebet / Ausrichtung', sub: 'Phil 4,6–7 · 3–5 Minuten', link: null },
+    { id: 'breath_478',  name: '4-7-8 Atemübung',          sub: '4 Runden · Vagus aktivieren', link: 'wandeln_atem_timer.html' },
+    { id: 'breath_coh',  name: 'Coherent Breathing',       sub: '5 Minuten · HRV-Training', link: 'wandeln_coherent_breathing.html' },
+    { id: 'stretch',     name: 'Dehnung + Kopfmassage',    sub: '5–10 Min · Nacken, Schultern, Kopf' },
+    { id: 'hum',         name: 'Summen / Worship / Singen', sub: '528 Hz · Vagus-Stimulation direkt' },
+    { id: 'cinnamon',    name: 'Zimt-Tee oder Zimt-Kaffee', sub: 'Ceylon-Zimt · Blutzucker-Stabilisierung' },
+  ]},
+  { section: 'Mahlzeiten', items: [
+    { id: 'pray_meal',   name: 'Gebet vor Hauptmahlzeit',  sub: 'Pause · Dankbarkeit · Mundtor bewusst öffnen' },
+    { id: 'omega',       name: 'Omega-3 zur Mahlzeit',     sub: '2g EPA+DHA · mit fetthaltiger Mahlzeit' },
+    { id: 'oliveoil',   name: 'Olivenöl extra vergine',   sub: '3–4 EL täglich · COX-Hemmung wie Ibuprofen' },
+  ]},
+  { section: 'Bewegung', items: [
+    { id: 'walk',        name: 'Spaziergang 1+ Stunde',    sub: 'BDNF +200% · bilateral · 3× pro Woche Ziel' },
+  ]},
+  { section: 'Abend · Supplemente', items: [
+    { id: 'mg_bisgly',   name: 'Magnesium Bisglycinat',    sub: '300–400 mg · 1h vor Schlaf' },
+    { id: 'baldrian',    name: 'Baldrian + Safran',         sub: '300mg Baldrian + 30mg Safran · abends' },
+  ]},
+  { section: 'Abend · Gewohnheiten', items: [
+    { id: 'stretch_pm',  name: 'Dehnung Nacken / Abend',   sub: '5 Min · Verspannungen lösen · Vagus freigeben' },
+    { id: 'pray_pm',     name: 'Abendgebet / Übergabe',    sub: 'Tagesfilter · 1. Petr 5,7 · loslassen' },
+    { id: 'sleep_loop',  name: 'Schlaf-Loop starten',       sub: '432 Hz + Schriftworte · über Nacht' },
+  ]},
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+var weekOffset = 0;
+var selectedDay = null; // Date object
+
+function getWeekDays(offset) {
+  var now = new Date();
+  var start = new Date(now);
+  start.setDate(now.getDate() + offset * 7);
+  var days = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(start);
+    d.setDate(start.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function dateKey(d) {
+  return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+}
+
+function loadDay(d) {
+  var key = dateKey(d);
+  var stored = localStorage.getItem('w_day_' + key);
+  return stored ? JSON.parse(stored) : { checked: {}, mood: 0 };
+}
+
+function saveDay(d, data) {
+  localStorage.setItem('w_day_' + dateKey(d), JSON.stringify(data));
+}
+
+function totalItems() {
+  var t = 0;
+  for (var s = 0; s < CHECKLIST.length; s++) t += CHECKLIST[s].items.length;
+  return t;
+}
+
+function countChecked(data) {
+  var c = 0;
+  for (var k in data.checked) { if (data.checked[k]) c++; }
+  return c;
+}
+
+// ── WEEK VIEW ─────────────────────────────────────────────────────────────────
+function renderWeek() {
+  var days = getWeekDays(weekOffset);
+  var today = new Date();
+
+  // KW
+  var d0 = days[0], d6 = days[6];
+  var fmt = function(d) { return d.getDate() + '.' + (d.getMonth()+1) + '.'; };
+  document.getElementById('weekLabel').textContent = fmt(d0) + ' – ' + fmt(d6) + d6.getFullYear();
+
+  var grid = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+
+  var totalIt = totalItems();
+  var walkCount = 0, moodSum = 0, moodCount = 0, completeDays = 0;
+  var moodsByDay = [];
+
+  for (var i = 0; i < 7; i++) {
+    var d = days[i];
+    var data = loadDay(d);
+    var checked = countChecked(data);
+    var pct = totalIt > 0 ? checked / totalIt : 0;
+    var isToday = sameDay(d, today);
+    var isFast = FASTING_DAYS.indexOf((d.getDay()+6)%7) >= 0;
+    var isSel = selectedDay && sameDay(d, selectedDay);
+
+    if (data.checked['walk']) walkCount++;
+    if (data.mood > 0) { moodSum += data.mood; moodCount++; }
+    if (pct >= 0.8) completeDays++;
+    moodsByDay.push(data.mood);
+
+    var col = document.createElement('div');
+    col.className = 'day-col' + (isToday ? ' today' : '') + (isSel ? ' selected' : '') + (isFast ? ' fasting' : '');
+    col.setAttribute('data-idx', i);
+    col.innerHTML =
+      '<div class="day-name">' + DAY_NAMES[(d.getDay()+6)%7] + '</div>' +
+      '<div class="day-num">' + d.getDate() + '</div>' +
+      '<div class="progress-ring">' + makeSVGRing(pct) + '</div>' +
+      '<div class="day-badges">' +
+        (data.checked['walk'] ? '<span class="badge walk">🚶</span>' : '') +
+        (isFast ? '<span class="badge fast">⬦ IF</span>' : '') +
+        (data.mood > 0 ? '<span class="badge mood">' + data.mood + '●</span>' : '') +
+      '</div>';
+    col.addEventListener('click', (function(day) {
+      return function() { selectDay(day); };
+    })(new Date(d)));
+    grid.appendChild(col);
+  }
+
+  document.getElementById('walkCount').textContent = walkCount;
+  document.getElementById('avgMood').textContent = moodCount > 0 ? (moodSum/moodCount).toFixed(1) : '—';
+  document.getElementById('completeDays').textContent = completeDays;
+
+  renderMoodChart(moodsByDay, days);
+}
+
+function makeSVGRing(pct) {
+  var r = 14, cx = 18, cy = 18;
+  var circ = 2 * Math.PI * r;
+  var offset = circ * (1 - pct);
+  var color = pct >= 0.8 ? '#2D7D46' : pct >= 0.5 ? '#C99400' : '#1A2E3A';
+  return '<svg viewBox="0 0 36 36"><circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="#1A2E3A" stroke-width="3"/>' +
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="3" stroke-linecap="round" ' +
+    'stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'" transform="rotate(-90 18 18)"/></svg>';
+}
+
+function renderMoodChart(moods, days) {
+  var chart = document.getElementById('moodChart');
+  chart.innerHTML = '';
+  var max = 5;
+  for (var i = 0; i < 7; i++) {
+    var m = moods[i] || 0;
+    var h = m > 0 ? Math.max(4, (m/max)*40) : 3;
+    var col = document.createElement('div');
+    col.className = 'chart-bar-wrap';
+    var barColor = m >= 4 ? '#2D7D46' : m >= 3 ? '#C99400' : m > 0 ? '#4A2A2A' : '#1A2E3A';
+    col.innerHTML = '<div class="chart-bar" style="height:'+h+'px;background:'+barColor+'"></div>' +
+      '<div class="chart-day-lbl">'+DAY_NAMES[(days[i].getDay()+6)%7]+'</div>';
+    chart.appendChild(col);
+  }
+}
+
+// ── DAY VIEW ──────────────────────────────────────────────────────────────────
+function selectDay(d) {
+  selectedDay = d;
+  showTab('day', document.querySelectorAll('.tab')[1]);
+  renderDay();
+  renderWeek();
+}
+
+function renderDay() {
+  if (!selectedDay) selectedDay = new Date();
+  var d = selectedDay;
+  var dayIdx = (d.getDay() + 6) % 7; // 0=Mon
+  var data = loadDay(d);
+
+  document.getElementById('dayTitle').textContent = DAY_FULL[dayIdx];
+  document.getElementById('dayDate').textContent =
+    d.getDate() + '.' + (d.getMonth()+1) + '.' + d.getFullYear();
+
+  var isFast = FASTING_DAYS.indexOf(dayIdx) >= 0;
+  document.getElementById('fastingBanner').style.display = isFast ? 'block' : 'none';
+
+  // Mood stars
+  renderMoodStars(data.mood);
+
+  // Checklist
+  var container = document.getElementById('checklistContainer');
+  container.innerHTML = '';
+
+  for (var s = 0; s < CHECKLIST.length; s++) {
+    var sec = CHECKLIST[s];
+    var secDiv = document.createElement('div');
+    secDiv.className = 'section-title';
+    secDiv.textContent = sec.section;
+    container.appendChild(secDiv);
+
+    var list = document.createElement('div');
+    list.className = 'check-list';
+
+    for (var ii = 0; ii < sec.items.length; ii++) {
+      var item = sec.items[ii];
+      var isChecked = !!data.checked[item.id];
+      var el = document.createElement('div');
+      el.className = 'check-item' + (isChecked ? ' checked' : '');
+      el.setAttribute('data-id', item.id);
+      el.innerHTML =
+        '<div class="check-box">' + (isChecked ? '✓' : '') + '</div>' +
+        '<div class="check-text">' +
+          '<div class="check-name">' + item.name + '</div>' +
+          (item.sub ? '<div class="check-sub">' + item.sub + '</div>' : '') +
+        '</div>' +
+        (item.link ? '<a class="check-link" href="'+item.link+'" target="_blank" onclick="event.stopPropagation()">▷ App</a>' : '');
+      el.addEventListener('click', (function(id) {
+        return function() { toggleCheck(id); };
+      })(item.id));
+      list.appendChild(el);
+    }
+    container.appendChild(list);
+  }
+}
+
+function toggleCheck(id) {
+  var d = selectedDay || new Date();
+  var data = loadDay(d);
+  data.checked[id] = !data.checked[id];
+  saveDay(d, data);
+  renderDay();
+  renderWeek();
+}
+
+function setMood(val) {
+  var d = selectedDay || new Date();
+  var data = loadDay(d);
+  data.mood = data.mood === val ? 0 : val;
+  saveDay(d, data);
+  renderMoodStars(data.mood);
+  renderWeek();
+}
+
+function renderMoodStars(val) {
+  var stars = document.querySelectorAll('.mood-star');
+  var colors = ['#C04040','#C07820','#C99400','#4DB8A8','#2D7D46'];
+  for (var i = 0; i < stars.length; i++) {
+    stars[i].className = 'mood-star' + (i < val ? ' lit' : '');
+    if (i < val) stars[i].style.color = colors[val-1];
+    else stars[i].style.color = '';
+  }
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function showTab(name, el) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'day') renderDay();
+}
+
+function changeWeek(dir) {
+  weekOffset += dir;
+  renderWeek();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function sameDay(a, b) {
+  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+}
+
+function getISOWeek(d) {
+  var date = new Date(d);
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay()+6)%7);
+  var week1 = new Date(date.getFullYear(), 0, 4);
+  return 1 + Math.round(((date.getTime()-week1.getTime())/86400000 - 3 + (week1.getDay()+6)%7)/7);
+}
+
+
+// ── CSV EXPORT ────────────────────────────────────────────────────────────────
+function exportCSV() {
+  var days = getWeekDays(weekOffset);
+  var rows = [['Datum','Wochentag','Stimmung','Zyklen abgeschlossen','Walk','Fasten','Abgeschlossene Punkte']];
+  var totalIt = totalItems();
+  var dayNamesDE = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+
+  for (var i = 0; i < 7; i++) {
+    var d = days[i];
+    var data = loadDay(d);
+    var dayIdx = (d.getDay()+6)%7;
+    var checked = countChecked(data);
+    var pct = totalIt > 0 ? Math.round((checked/totalIt)*100) : 0;
+    rows.push([
+      d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear(),
+      dayNamesDE[dayIdx],
+      data.mood || '',
+      checked + ' / ' + totalIt + ' (' + pct + '%)',
+      data.checked['walk'] ? 'Ja' : 'Nein',
+      (FASTING_DAYS.indexOf(dayIdx) >= 0) ? 'Fastentag' : '',
+      pct + '%'
+    ]);
+  }
+
+  var csv = rows.map(function(r) {
+    return r.map(function(cell) {
+      return '"' + String(cell).replace(/"/g,'""') + '"';
+    }).join(',');
+  }).join('\n');
+
+  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var d0 = days[0], d6 = days[6];
+  a.href = url;
+  a.download = 'wandeln_' + d0.getDate()+'_'+(d0.getMonth()+1) + '_bis_' + d6.getDate()+'_'+(d6.getMonth()+1) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+selectedDay = new Date();
+renderWeek();
+</script>
+</body>
+</html>
