@@ -2,298 +2,222 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wandeln · 4-7-8 Atemübung</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: Georgia, serif;
-    background: #0A1520;
-    color: #F0EAD6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    user-select: none;
-  }
-
-  .brand {
-    font-size: 13px;
-    letter-spacing: 4px;
-    color: #C99400;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-
-  .subtitle {
-    font-size: 12px;
-    color: #5A4A2A;
-    margin-bottom: 48px;
-    font-style: italic;
-    letter-spacing: 1px;
-  }
-
-  .circle-wrap {
-    position: relative;
-    width: 240px;
-    height: 240px;
-    margin-bottom: 40px;
-  }
-
-  svg.ring {
-    position: absolute;
-    top: 0; left: 0;
-    width: 240px;
-    height: 240px;
-    transform: rotate(-90deg);
-  }
-
-  .ring-bg {
-    fill: none;
-    stroke: #1A2E3A;
-    stroke-width: 10;
-  }
-
-  .ring-progress {
-    fill: none;
-    stroke: #C99400;
-    stroke-width: 10;
-    stroke-linecap: round;
-    stroke-dasharray: 659;
-    stroke-dashoffset: 659;
-    transition: stroke-dashoffset 1s linear, stroke 0.4s ease;
-  }
-
-  .circle-inner {
-    position: absolute;
-    top: 0; left: 0;
-    width: 240px;
-    height: 240px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .phase-label {
-    font-size: 13px;
-    letter-spacing: 3px;
-    color: #8A7A5A;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    min-height: 18px;
-    transition: opacity 0.3s;
-  }
-
-  .countdown {
-    font-size: 72px;
-    font-weight: 400;
-    color: #F0EAD6;
-    line-height: 1;
-    transition: color 0.4s;
-  }
-
-  .phase-number {
-    font-size: 12px;
-    color: #5A4A2A;
-    margin-top: 10px;
-    letter-spacing: 2px;
-  }
-
-  .instruction {
-    font-size: 18px;
-    color: #C99400;
-    margin-bottom: 16px;
-    min-height: 28px;
-    text-align: center;
-    font-style: italic;
-    letter-spacing: 1px;
-    transition: opacity 0.3s;
-  }
-
-  .loops {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 40px;
-  }
-
-  .loop-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #1A2E3A;
-    border: 1.5px solid #C99400;
-    transition: background 0.4s;
-  }
-
-  .loop-dot.done {
-    background: #C99400;
-  }
-
-  .loop-dot.active {
-    background: #C99400;
-    opacity: 0.5;
-  }
-
-  .btn {
-    background: none;
-    border: 1.5px solid #C99400;
-    color: #C99400;
-    font-family: Georgia, serif;
-    font-size: 15px;
-    letter-spacing: 3px;
-    padding: 14px 40px;
-    border-radius: 40px;
-    cursor: pointer;
-    transition: background 0.3s, color 0.3s;
-    text-transform: uppercase;
-  }
-
-  .btn:hover, .btn:active {
-    background: #C99400;
-    color: #0A1520;
-  }
-
-  .verse {
-    margin-top: 36px;
-    font-size: 13px;
-    color: #5A4A2A;
-    text-align: center;
-    font-style: italic;
-    max-width: 280px;
-    line-height: 1.8;
-  }
-
-  .done-msg {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .done-msg.visible { display: flex; }
-
-  .done-title {
-    font-size: 22px;
-    color: #C99400;
-    letter-spacing: 2px;
-  }
-
-  .done-sub {
-    font-size: 14px;
-    color: #8A7A5A;
-    text-align: center;
-    font-style: italic;
-    max-width: 260px;
-    line-height: 1.8;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Georgia, serif;
+  background: #0A1520;
+  color: #F0EAD6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 24px 32px;
+  overflow-y: auto;
+  user-select: none;
+}
+.brand { font-size: 13px; letter-spacing: 4px; color: #C99400; margin-bottom: 6px; text-transform: uppercase; text-align: center; }
+.subtitle { font-size: 12px; color: #8A7A5A; margin-bottom: 36px; font-style: italic; letter-spacing: 1px; text-align: center; }
+.circle-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 24px; }
+svg.ring { position: absolute; top: 0; left: 0; width: 220px; height: 220px; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: #1A2E3A; stroke-width: 10; }
+.ring-progress { fill: none; stroke: #C99400; stroke-width: 10; stroke-linecap: round;
+  stroke-dasharray: 597; stroke-dashoffset: 597;
+  transition: stroke-dashoffset 1s linear, stroke 0.4s ease; }
+.circle-inner { position: absolute; top: 0; left: 0; width: 220px; height: 220px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.flash-ring { position: absolute; top: 0; left: 0; width: 220px; height: 220px;
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  transition: opacity 0.15s ease; }
+.flash-ring.active { opacity: 1; }
+.phase-label { font-size: 12px; letter-spacing: 3px; color: #8A7A5A; text-transform: uppercase;
+  margin-bottom: 6px; min-height: 18px; }
+.countdown { font-size: 68px; font-weight: 400; color: #F0EAD6; line-height: 1; transition: color 0.4s; }
+.loop-label { font-size: 11px; color: #4A3A1A; margin-top: 8px; letter-spacing: 2px; }
+.instruction { font-size: 16px; color: #C99400; margin-bottom: 12px; min-height: 26px;
+  text-align: center; font-style: italic; letter-spacing: 1px; }
+.loops { display: flex; gap: 10px; margin-bottom: 20px; }
+.loop-dot { width: 10px; height: 10px; border-radius: 50%; background: #1A2E3A;
+  border: 1.5px solid #C99400; transition: background 0.4s; }
+.loop-dot.done { background: #C99400; }
+.loop-dot.active { background: #C99400; opacity: 0.5; }
+.controls { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 280px; }
+.sound-row { display: flex; align-items: center; gap: 10px; }
+.sound-lbl { font-size: 11px; color: #4A3A1A; letter-spacing: 2px; text-transform: uppercase; }
+.toggle { width: 36px; height: 18px; background: #1A2E3A; border-radius: 18px;
+  border: 1.5px solid #C99400; cursor: pointer; position: relative; transition: background 0.3s; flex-shrink: 0; }
+.toggle.on { background: #C99400; }
+.toggle-knob { position: absolute; top: 1px; left: 1px; width: 13px; height: 13px;
+  border-radius: 50%; background: #F0EAD6; transition: left 0.3s; }
+.toggle.on .toggle-knob { left: 20px; }
+.btn { background: none; border: 1.5px solid #C99400; color: #C99400;
+  font-family: Georgia, serif; font-size: 14px; letter-spacing: 3px;
+  padding: 12px 32px; border-radius: 40px; cursor: pointer;
+  transition: background 0.3s, color 0.3s; text-transform: uppercase; }
+.btn:hover { background: #C99400; color: #0A1520; }
+.verse { margin-top: 24px; font-size: 12px; color: #5A4A2A; text-align: center;
+  font-style: italic; max-width: 260px; line-height: 1.9; }
+.done-msg { display: none; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.done-msg.visible { display: flex; }
+.done-title { font-size: 20px; color: #C99400; letter-spacing: 2px; }
+.done-sub { font-size: 13px; color: #8A7A5A; text-align: center; font-style: italic;
+  max-width: 250px; line-height: 1.9; }
 </style>
 </head>
 <body>
-
 <div class="brand">Wandeln</div>
 <div class="subtitle">metamorphousthai · Röm 12,2</div>
 
-<div id="main">
+<div id="main" style="display:flex;flex-direction:column;align-items:center">
   <div class="circle-wrap">
-    <svg class="ring" viewBox="0 0 240 240">
-      <circle class="ring-bg" cx="120" cy="120" r="105"/>
-      <circle class="ring-progress" id="ring" cx="120" cy="120" r="105"/>
+    <svg class="ring" viewBox="0 0 220 220">
+      <circle class="ring-bg" cx="110" cy="110" r="95"/>
+      <circle class="ring-progress" id="ring" cx="110" cy="110" r="95"/>
     </svg>
+    <div class="flash-ring" id="flashRing"></div>
     <div class="circle-inner">
       <div class="phase-label" id="phaseLabel">Bereit</div>
       <div class="countdown" id="countdown">4</div>
-      <div class="phase-number" id="loopLabel">Runde 1 von 4</div>
+      <div class="loop-label" id="loopLabel">Runde 1 von 4</div>
     </div>
   </div>
 
   <div class="instruction" id="instruction">Beruhige dich. Atme natürlich.</div>
 
-  <div class="loops" id="dots">
+  <div class="loops">
     <div class="loop-dot" id="d0"></div>
     <div class="loop-dot" id="d1"></div>
     <div class="loop-dot" id="d2"></div>
     <div class="loop-dot" id="d3"></div>
   </div>
 
-  <button class="btn" id="btn" onclick="handleBtn()">Start</button>
+  <div class="controls">
+    <div class="sound-row">
+      <div class="sound-lbl">Ton</div>
+      <div class="toggle" id="sndToggle" onclick="toggleSound()">
+        <div class="toggle-knob"></div>
+      </div>
+      <span style="font-size:11px;color:#4A3A1A;letter-spacing:1px" id="sndLabel">Aus</span>
+    </div>
+    <button class="btn" id="btn" onclick="handleBtn()">Start</button>
+  </div>
 
-  <div class="verse">„Der Friede Gottes, der allen Verstand übersteigt,<br>wird eure Herzen bewachen."<br>Phil 4,7</div>
+  <div class="verse">„Der Herr ist nahe.<br>Und der Friede Gottes, der allen Verstand übersteigt,<br>wird eure Herzen bewachen."<br>Phil 4,5–7</div>
 </div>
 
 <div class="done-msg" id="doneMsg">
   <div class="done-title">4 Runden · Fertig</div>
-  <div class="done-sub">Der präfrontale Kortex ist wieder zugänglich.<br>Dein Vagusnerv ist aktiv.<br><br>„Seid stille und erkennet, dass ich Gott bin."<br>Psalm 46,11</div>
-  <button class="btn" onclick="reset()" style="margin-top:8px">Nochmal</button>
+  <div class="done-sub">Der präfrontale Kortex ist wieder zugänglich.<br>Dein Vagusnerv ist aktiv.<br><br>„Der Herr ist nahe."<br>Phil 4,5</div>
+  <button class="btn" onclick="resetApp()" style="margin-top:8px">Nochmal</button>
 </div>
 
 <script>
-const PHASES = [
-  { label: "Einatmen", instruction: "Durch die Nase einatmen...", duration: 4, color: "#1D7A6B" },
-  { label: "Halten",   instruction: "Atem anhalten...",           duration: 7, color: "#C99400" },
-  { label: "Ausatmen", instruction: "Langsam durch den Mund...",  duration: 8, color: "#2E4057" },
+var PHASES = [
+  { label: "Einatmen",  instruction: "Durch die Nase einatmen...",   duration: 4, color: "#1D7A6B", flash: "rgba(29,122,107,0.25)", tone: 174 },
+  { label: "Halten",    instruction: "Atem anhalten...",             duration: 7, color: "#C99400", flash: "rgba(201,148,0,0.2)",  tone: 136 },
+  { label: "Ausatmen",  instruction: "Langsam durch den Mund...",    duration: 8, color: "#2E4057", flash: "rgba(46,64,87,0.3)",   tone: 110 }
 ];
+var TOTAL_LOOPS = 4;
+var CIRC = 2 * Math.PI * 95;
 
-const TOTAL_LOOPS = 4;
-const CIRCUMFERENCE = 2 * Math.PI * 105; // 659.7
+var running = false, soundOn = false;
+var currentLoop = 0, currentPhase = 0, currentSec = 0;
+var timer = null;
+var audioCtx = null, osc = null, gainNode = null;
 
-let running = false;
-let currentLoop = 0;
-let currentPhase = 0;
-let currentSec = 0;
-let timer = null;
+var ring      = document.getElementById("ring");
+var cdEl      = document.getElementById("countdown");
+var phLabel   = document.getElementById("phaseLabel");
+var loopLabel = document.getElementById("loopLabel");
+var instrEl   = document.getElementById("instruction");
+var btn       = document.getElementById("btn");
+var mainEl    = document.getElementById("main");
+var doneMsg   = document.getElementById("doneMsg");
+var flashRing = document.getElementById("flashRing");
 
-const ring = document.getElementById('ring');
-const countdown = document.getElementById('countdown');
-const phaseLabel = document.getElementById('phaseLabel');
-const loopLabel = document.getElementById('loopLabel');
-const instruction = document.getElementById('instruction');
-const btn = document.getElementById('btn');
-const main = document.getElementById('main');
-const doneMsg = document.getElementById('doneMsg');
+ring.style.strokeDasharray = CIRC;
+ring.style.strokeDashoffset = CIRC;
 
-function setRing(progress, color) {
-  // progress 0..1
-  const offset = CIRCUMFERENCE * (1 - progress);
-  ring.style.strokeDashoffset = offset;
-  ring.style.stroke = color || '#C99400';
+// ── AUDIO ──────────────────────────────────────────────
+function initAudio() {
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = audioCtx.createGain();
+    gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+    gainNode.connect(audioCtx.destination);
+  } catch(e) { soundOn = false; }
 }
 
+function playTransitionTone(freq) {
+  if (!soundOn || !audioCtx) return;
+  try {
+    if (osc) { try { osc.stop(); } catch(e){} osc.disconnect(); }
+    osc = audioCtx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.connect(gainNode);
+    var t = audioCtx.currentTime;
+    gainNode.gain.cancelScheduledValues(t);
+    gainNode.gain.setValueAtTime(0, t);
+    gainNode.gain.linearRampToValueAtTime(0.10, t + 0.3);
+    gainNode.gain.linearRampToValueAtTime(0, t + 1.2);
+    osc.start(t);
+    osc.stop(t + 1.5);
+  } catch(e) {}
+}
+
+// ── RING ───────────────────────────────────────────────
+function setRing(progress, color) {
+  ring.style.strokeDashoffset = CIRC * (1 - progress);
+  ring.style.stroke = color;
+}
+
+// ── FLASH ──────────────────────────────────────────────
+function doFlash(color) {
+  flashRing.style.background = "radial-gradient(circle, " + color + " 0%, transparent 70%)";
+  flashRing.classList.add("active");
+  setTimeout(function() { flashRing.classList.remove("active"); }, 300);
+}
+
+// ── UPDATE DOTS ────────────────────────────────────────
 function updateDots() {
-  for (let i = 0; i < TOTAL_LOOPS; i++) {
-    const d = document.getElementById('d' + i);
-    d.className = 'loop-dot';
-    if (i < currentLoop) d.classList.add('done');
-    else if (i === currentLoop) d.classList.add('active');
+  for (var i = 0; i < TOTAL_LOOPS; i++) {
+    var d = document.getElementById("d" + i);
+    d.className = "loop-dot";
+    if (i < currentLoop) d.classList.add("done");
+    else if (i === currentLoop) d.classList.add("active");
   }
 }
 
+// ── TICK ───────────────────────────────────────────────
 function tick() {
-  const phase = PHASES[currentPhase];
-  const total = phase.duration;
+  var phase = PHASES[currentPhase];
+  var total = phase.duration;
 
-  countdown.textContent = currentSec;
-  phaseLabel.textContent = phase.label;
-  instruction.textContent = phase.instruction;
-  loopLabel.textContent = `Runde ${currentLoop + 1} von ${TOTAL_LOOPS}`;
+  cdEl.textContent = currentSec;
+  phLabel.textContent = phase.label;
+  instrEl.textContent = phase.instruction;
+  loopLabel.textContent = "Runde " + (currentLoop + 1) + " von " + TOTAL_LOOPS;
   setRing((total - currentSec) / total, phase.color);
-  countdown.style.color = phase.color === '#C99400' ? '#C99400' : '#F0EAD6';
 
   if (currentSec <= 0) {
+    // Phase transition — flash + tone
     currentPhase++;
     if (currentPhase >= PHASES.length) {
       currentPhase = 0;
       currentLoop++;
       updateDots();
-      if (currentLoop >= TOTAL_LOOPS) {
-        finish();
-        return;
-      }
+      if (currentLoop >= TOTAL_LOOPS) { finish(); return; }
     }
-    currentSec = PHASES[currentPhase].duration;
+    var nextPhase = PHASES[currentPhase];
+    doFlash(nextPhase.flash);
+    playTransitionTone(nextPhase.tone);
+    currentSec = nextPhase.duration;
+    setRing(0, nextPhase.color);
   } else {
     currentSec--;
   }
@@ -301,8 +225,10 @@ function tick() {
 
 function start() {
   running = true;
-  btn.textContent = 'Pause';
+  btn.textContent = "Pause";
   currentSec = PHASES[0].duration;
+  doFlash(PHASES[0].flash);
+  playTransitionTone(PHASES[0].tone);
   tick();
   timer = setInterval(tick, 1000);
 }
@@ -310,17 +236,18 @@ function start() {
 function pause() {
   running = false;
   clearInterval(timer);
-  btn.textContent = 'Weiter';
+  btn.textContent = "Weiter";
 }
 
 function resume() {
   running = true;
-  btn.textContent = 'Pause';
+  btn.textContent = "Pause";
   timer = setInterval(tick, 1000);
 }
 
 function handleBtn() {
-  if (!running && currentLoop === 0 && currentPhase === 0) {
+  if (!running && currentLoop === 0 && currentPhase === 0 && currentSec === 0) {
+    initAudio();
     start();
   } else if (running) {
     pause();
@@ -332,37 +259,38 @@ function handleBtn() {
 function finish() {
   clearInterval(timer);
   running = false;
-  main.style.display = 'none';
-  doneMsg.classList.add('visible');
-  // Mark all dots done
-  for (let i = 0; i < TOTAL_LOOPS; i++) {
-    document.getElementById('d' + i).className = 'loop-dot done';
+  mainEl.style.display = "none";
+  doneMsg.classList.add("visible");
+  for (var i = 0; i < TOTAL_LOOPS; i++) {
+    document.getElementById("d" + i).className = "loop-dot done";
   }
 }
 
-function reset() {
+function resetApp() {
   clearInterval(timer);
   running = false;
-  currentLoop = 0;
-  currentPhase = 0;
-  currentSec = 0;
-  main.style.display = 'flex';
-  main.style.flexDirection = 'column';
-  main.style.alignItems = 'center';
-  doneMsg.classList.remove('visible');
-  btn.textContent = 'Start';
-  countdown.textContent = '4';
-  phaseLabel.textContent = 'Bereit';
-  instruction.textContent = 'Beruhige dich. Atme natürlich.';
-  loopLabel.textContent = 'Runde 1 von 4';
-  setRing(0, '#C99400');
-  ring.style.strokeDashoffset = CIRCUMFERENCE;
+  currentLoop = 0; currentPhase = 0; currentSec = 0;
+  mainEl.style.display = "flex";
+  doneMsg.classList.remove("visible");
+  btn.textContent = "Start";
+  cdEl.textContent = "4";
+  phLabel.textContent = "Bereit";
+  instrEl.textContent = "Beruhige dich. Atme natürlich.";
+  loopLabel.textContent = "Runde 1 von 4";
+  setRing(0, "#C99400");
+  ring.style.strokeDashoffset = CIRC;
   updateDots();
 }
 
-// Init ring
-ring.style.strokeDasharray = CIRCUMFERENCE;
-ring.style.strokeDashoffset = CIRCUMFERENCE;
+function toggleSound() {
+  soundOn = !soundOn;
+  if (soundOn) initAudio();
+  var t = document.getElementById("sndToggle");
+  var l = document.getElementById("sndLabel");
+  t.className = "toggle" + (soundOn ? " on" : "");
+  l.textContent = soundOn ? "An" : "Aus";
+}
+
 updateDots();
 </script>
 </body>
