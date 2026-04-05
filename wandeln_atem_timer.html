@@ -15,35 +15,39 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 20px 24px 32px;
+  padding: 24px 24px 40px;
   overflow-y: auto;
   user-select: none;
 }
 .brand { font-size: 13px; letter-spacing: 4px; color: #C99400; margin-bottom: 6px; text-transform: uppercase; text-align: center; }
 .subtitle { font-size: 12px; color: #8A7A5A; margin-bottom: 36px; font-style: italic; letter-spacing: 1px; text-align: center; }
-.circle-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 24px; }
-svg.ring { position: absolute; top: 0; left: 0; width: 220px; height: 220px; transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: #1A2E3A; stroke-width: 10; }
-.ring-progress { fill: none; stroke: #C99400; stroke-width: 10; stroke-linecap: round;
-  stroke-dasharray: 597; stroke-dashoffset: 597;
-  transition: stroke-dashoffset 1s linear, stroke 0.4s ease; }
-.circle-inner { position: absolute; top: 0; left: 0; width: 220px; height: 220px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.flash-ring { position: absolute; top: 0; left: 0; width: 220px; height: 220px;
-  border-radius: 50%; pointer-events: none; opacity: 0;
-  transition: opacity 0.15s ease; }
-.flash-ring.active { opacity: 1; }
-.phase-label { font-size: 12px; letter-spacing: 3px; color: #8A7A5A; text-transform: uppercase;
-  margin-bottom: 6px; min-height: 18px; }
-.countdown { font-size: 68px; font-weight: 400; color: #F0EAD6; line-height: 1; transition: color 0.4s; }
+
+.circle-wrap { position: relative; width: 220px; height: 220px; margin-bottom: 20px; }
+svg.ring { width: 220px; height: 220px; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: #1A2E3A; stroke-width: 14; }
+.ring-fill { fill: none; stroke-width: 14; stroke-linecap: butt;
+  stroke-dasharray: 565;
+  stroke-dashoffset: 565;
+  transition: stroke-dashoffset 0.25s linear, stroke 0.3s ease; }
+
+.circle-inner {
+  position: absolute; top: 0; left: 0; width: 220px; height: 220px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.phase-label { font-size: 12px; letter-spacing: 3px; color: #8A7A5A;
+  text-transform: uppercase; margin-bottom: 6px; min-height: 18px; }
+.countdown { font-size: 68px; color: #F0EAD6; line-height: 1; transition: color 0.3s; }
 .loop-label { font-size: 11px; color: #4A3A1A; margin-top: 8px; letter-spacing: 2px; }
-.instruction { font-size: 16px; color: #C99400; margin-bottom: 12px; min-height: 26px;
-  text-align: center; font-style: italic; letter-spacing: 1px; }
+
+.instruction { font-size: 16px; color: #C99400; margin-bottom: 16px;
+  min-height: 26px; text-align: center; font-style: italic; letter-spacing: 1px; }
+
 .loops { display: flex; gap: 10px; margin-bottom: 20px; }
-.loop-dot { width: 10px; height: 10px; border-radius: 50%; background: #1A2E3A;
-  border: 1.5px solid #C99400; transition: background 0.4s; }
+.loop-dot { width: 10px; height: 10px; border-radius: 50%;
+  background: #1A2E3A; border: 1.5px solid #C99400; transition: background 0.4s; }
 .loop-dot.done { background: #C99400; }
 .loop-dot.active { background: #C99400; opacity: 0.5; }
+
 .controls { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 280px; }
 .sound-row { display: flex; align-items: center; gap: 10px; }
 .sound-lbl { font-size: 11px; color: #4A3A1A; letter-spacing: 2px; text-transform: uppercase; }
@@ -53,13 +57,17 @@ svg.ring { position: absolute; top: 0; left: 0; width: 220px; height: 220px; tra
 .toggle-knob { position: absolute; top: 1px; left: 1px; width: 13px; height: 13px;
   border-radius: 50%; background: #F0EAD6; transition: left 0.3s; }
 .toggle.on .toggle-knob { left: 20px; }
+.snd-val { font-size: 11px; color: #4A3A1A; letter-spacing: 1px; min-width: 20px; }
+
 .btn { background: none; border: 1.5px solid #C99400; color: #C99400;
   font-family: Georgia, serif; font-size: 14px; letter-spacing: 3px;
   padding: 12px 32px; border-radius: 40px; cursor: pointer;
   transition: background 0.3s, color 0.3s; text-transform: uppercase; }
 .btn:hover { background: #C99400; color: #0A1520; }
+
 .verse { margin-top: 24px; font-size: 12px; color: #5A4A2A; text-align: center;
   font-style: italic; max-width: 260px; line-height: 1.9; }
+
 .done-msg { display: none; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
 .done-msg.visible { display: flex; }
 .done-title { font-size: 20px; color: #C99400; letter-spacing: 2px; }
@@ -68,16 +76,17 @@ svg.ring { position: absolute; top: 0; left: 0; width: 220px; height: 220px; tra
 </style>
 </head>
 <body>
+
 <div class="brand">Wandeln</div>
 <div class="subtitle">metamorphousthai · Röm 12,2</div>
 
 <div id="main" style="display:flex;flex-direction:column;align-items:center">
+
   <div class="circle-wrap">
     <svg class="ring" viewBox="0 0 220 220">
-      <circle class="ring-bg" cx="110" cy="110" r="95"/>
-      <circle class="ring-progress" id="ring" cx="110" cy="110" r="95"/>
+      <circle class="ring-bg" cx="110" cy="110" r="90"/>
+      <circle class="ring-fill" id="ring" cx="110" cy="110" r="90"/>
     </svg>
-    <div class="flash-ring" id="flashRing"></div>
     <div class="circle-inner">
       <div class="phase-label" id="phaseLabel">Bereit</div>
       <div class="countdown" id="countdown">4</div>
@@ -100,7 +109,7 @@ svg.ring { position: absolute; top: 0; left: 0; width: 220px; height: 220px; tra
       <div class="toggle" id="sndToggle" onclick="toggleSound()">
         <div class="toggle-knob"></div>
       </div>
-      <span style="font-size:11px;color:#4A3A1A;letter-spacing:1px" id="sndLabel">Aus</span>
+      <span class="snd-val" id="sndLabel">Aus</span>
     </div>
     <button class="btn" id="btn" onclick="handleBtn()">Start</button>
   </div>
@@ -116,32 +125,31 @@ svg.ring { position: absolute; top: 0; left: 0; width: 220px; height: 220px; tra
 
 <script>
 var PHASES = [
-  { label: "Einatmen",  instruction: "Durch die Nase einatmen...",   duration: 4, color: "#1D7A6B", flash: "rgba(29,122,107,0.25)", tone: 174 },
-  { label: "Halten",    instruction: "Atem anhalten...",             duration: 7, color: "#C99400", flash: "rgba(201,148,0,0.2)",  tone: 136 },
-  { label: "Ausatmen",  instruction: "Langsam durch den Mund...",    duration: 8, color: "#2E4057", flash: "rgba(46,64,87,0.3)",   tone: 110 }
+  { label: "Einatmen",  instruction: "Durch die Nase einatmen...",  dur: 4, color: "#1D7A6B", tone: 174 },
+  { label: "Halten",    instruction: "Atem anhalten...",            dur: 7, color: "#C99400", tone: 136 },
+  { label: "Ausatmen",  instruction: "Langsam durch den Mund...",   dur: 8, color: "#2E6080", tone: 110 }
 ];
-var TOTAL_LOOPS = 4;
-var CIRC = 2 * Math.PI * 95;
+var CIRC = 2 * Math.PI * 90; // 565.5
 
 var running = false, soundOn = false;
-var currentLoop = 0, currentPhase = 0, currentSec = 0;
-var timer = null;
+var curLoop = 0, curPhase = 0;
+var totalSec = 0; // seconds elapsed in current phase
+var ticker = null;
 var audioCtx = null, osc = null, gainNode = null;
 
 var ring      = document.getElementById("ring");
 var cdEl      = document.getElementById("countdown");
 var phLabel   = document.getElementById("phaseLabel");
-var loopLabel = document.getElementById("loopLabel");
 var instrEl   = document.getElementById("instruction");
+var loopLabel = document.getElementById("loopLabel");
 var btn       = document.getElementById("btn");
 var mainEl    = document.getElementById("main");
 var doneMsg   = document.getElementById("doneMsg");
-var flashRing = document.getElementById("flashRing");
 
 ring.style.strokeDasharray = CIRC;
 ring.style.strokeDashoffset = CIRC;
 
-// ── AUDIO ──────────────────────────────────────────────
+// ── AUDIO ─────────────────────────────────────────────
 function initAudio() {
   if (audioCtx) return;
   try {
@@ -152,7 +160,7 @@ function initAudio() {
   } catch(e) { soundOn = false; }
 }
 
-function playTransitionTone(freq) {
+function playTone(freq) {
   if (!soundOn || !audioCtx) return;
   try {
     if (osc) { try { osc.stop(); } catch(e){} osc.disconnect(); }
@@ -163,113 +171,99 @@ function playTransitionTone(freq) {
     var t = audioCtx.currentTime;
     gainNode.gain.cancelScheduledValues(t);
     gainNode.gain.setValueAtTime(0, t);
-    gainNode.gain.linearRampToValueAtTime(0.10, t + 0.3);
-    gainNode.gain.linearRampToValueAtTime(0, t + 1.2);
+    gainNode.gain.linearRampToValueAtTime(0.10, t + 0.4);
+    gainNode.gain.linearRampToValueAtTime(0, t + 1.4);
     osc.start(t);
-    osc.stop(t + 1.5);
+    osc.stop(t + 1.6);
   } catch(e) {}
 }
 
-// ── RING ───────────────────────────────────────────────
+// ── RING: progress 0..1, fills smoothly ───────────────
 function setRing(progress, color) {
-  ring.style.strokeDashoffset = CIRC * (1 - progress);
   ring.style.stroke = color;
+  ring.style.strokeDashoffset = CIRC * (1 - progress);
 }
 
-// ── FLASH ──────────────────────────────────────────────
-function doFlash(color) {
-  flashRing.style.background = "radial-gradient(circle, " + color + " 0%, transparent 70%)";
-  flashRing.classList.add("active");
-  setTimeout(function() { flashRing.classList.remove("active"); }, 300);
-}
-
-// ── UPDATE DOTS ────────────────────────────────────────
+// ── DOTS ──────────────────────────────────────────────
 function updateDots() {
-  for (var i = 0; i < TOTAL_LOOPS; i++) {
+  for (var i = 0; i < 4; i++) {
     var d = document.getElementById("d" + i);
     d.className = "loop-dot";
-    if (i < currentLoop) d.classList.add("done");
-    else if (i === currentLoop) d.classList.add("active");
+    if (i < curLoop) d.classList.add("done");
+    else if (i === curLoop) d.classList.add("active");
   }
 }
 
-// ── TICK ───────────────────────────────────────────────
+// ── PHASE START ───────────────────────────────────────
+function startPhase(p) {
+  curPhase = p;
+  totalSec = 0;
+  var ph = PHASES[p];
+  phLabel.textContent = ph.label;
+  instrEl.textContent = ph.instruction;
+  cdEl.textContent = ph.dur;
+  setRing(0, ph.color);
+  playTone(ph.tone);
+}
+
+// ── TICK every 100ms for smooth fill ─────────────────
 function tick() {
-  var phase = PHASES[currentPhase];
-  var total = phase.duration;
+  if (!running) return;
+  var ph = PHASES[curPhase];
+  totalSec += 0.1;
 
-  cdEl.textContent = currentSec;
-  phLabel.textContent = phase.label;
-  instrEl.textContent = phase.instruction;
-  loopLabel.textContent = "Runde " + (currentLoop + 1) + " von " + TOTAL_LOOPS;
-  setRing((total - currentSec) / total, phase.color);
+  var progress = Math.min(totalSec / ph.dur, 1);
+  setRing(progress, ph.color);
 
-  if (currentSec <= 0) {
-    // Phase transition — flash + tone
-    currentPhase++;
-    if (currentPhase >= PHASES.length) {
-      currentPhase = 0;
-      currentLoop++;
+  // countdown: remaining full seconds
+  var remaining = Math.max(0, Math.ceil(ph.dur - totalSec));
+  cdEl.textContent = remaining;
+
+  if (progress >= 1) {
+    // phase done — move to next
+    var nextPhase = curPhase + 1;
+    if (nextPhase >= PHASES.length) {
+      nextPhase = 0;
+      curLoop++;
       updateDots();
-      if (currentLoop >= TOTAL_LOOPS) { finish(); return; }
+      if (curLoop >= 4) { finish(); return; }
     }
-    var nextPhase = PHASES[currentPhase];
-    doFlash(nextPhase.flash);
-    playTransitionTone(nextPhase.tone);
-    currentSec = nextPhase.duration;
-    setRing(0, nextPhase.color);
-  } else {
-    currentSec--;
+    loopLabel.textContent = "Runde " + (curLoop + 1) + " von 4";
+    startPhase(nextPhase);
   }
 }
 
-function start() {
-  running = true;
-  btn.textContent = "Pause";
-  currentSec = PHASES[0].duration;
-  doFlash(PHASES[0].flash);
-  playTransitionTone(PHASES[0].tone);
-  tick();
-  timer = setInterval(tick, 1000);
-}
-
-function pause() {
-  running = false;
-  clearInterval(timer);
-  btn.textContent = "Weiter";
-}
-
-function resume() {
-  running = true;
-  btn.textContent = "Pause";
-  timer = setInterval(tick, 1000);
-}
-
+// ── CONTROLS ──────────────────────────────────────────
 function handleBtn() {
-  if (!running && currentLoop === 0 && currentPhase === 0 && currentSec === 0) {
+  if (!running && curLoop === 0 && curPhase === 0 && totalSec === 0) {
     initAudio();
-    start();
+    running = true;
+    btn.textContent = "Pause";
+    loopLabel.textContent = "Runde 1 von 4";
+    startPhase(0);
+    ticker = setInterval(tick, 100);
   } else if (running) {
-    pause();
+    running = false;
+    clearInterval(ticker);
+    btn.textContent = "Weiter";
   } else {
-    resume();
+    running = true;
+    btn.textContent = "Pause";
+    ticker = setInterval(tick, 100);
   }
 }
 
 function finish() {
-  clearInterval(timer);
   running = false;
+  clearInterval(ticker);
   mainEl.style.display = "none";
   doneMsg.classList.add("visible");
-  for (var i = 0; i < TOTAL_LOOPS; i++) {
-    document.getElementById("d" + i).className = "loop-dot done";
-  }
 }
 
 function resetApp() {
-  clearInterval(timer);
   running = false;
-  currentLoop = 0; currentPhase = 0; currentSec = 0;
+  clearInterval(ticker);
+  curLoop = 0; curPhase = 0; totalSec = 0;
   mainEl.style.display = "flex";
   doneMsg.classList.remove("visible");
   btn.textContent = "Start";
@@ -285,10 +279,8 @@ function resetApp() {
 function toggleSound() {
   soundOn = !soundOn;
   if (soundOn) initAudio();
-  var t = document.getElementById("sndToggle");
-  var l = document.getElementById("sndLabel");
-  t.className = "toggle" + (soundOn ? " on" : "");
-  l.textContent = soundOn ? "An" : "Aus";
+  document.getElementById("sndToggle").className = "toggle" + (soundOn ? " on" : "");
+  document.getElementById("sndLabel").textContent = soundOn ? "An" : "Aus";
 }
 
 updateDots();
