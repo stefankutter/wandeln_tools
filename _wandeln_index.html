@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wandeln · Geistig-Emotionales Regenerationsprotokoll</title>
+<meta name="description" content="Kostenlose Werkzeuge, Audios und Protokoll zur geistig-emotionalen Regeneration. Neurobiologie trifft Neues Testament.">
+
+<!-- Open Graph für Telegram & Social Preview -->
+<meta property="og:title" content="Wandeln · Metamorphose beginnt im Geist">
+<meta property="og:description" content="Kostenlose Atemübungen, Supplement-Rechner, Tagesplaner und das vollständige Regenerationsprotokoll. Neurobiologie trifft Neues Testament.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://stefankutter.github.io/wandeln_tools/">
+<meta property="og:image" content="https://stefankutter.github.io/wandeln_tools/og_image.png">
+<meta property="og:locale" content="de_DE">
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+:root {
+  --navy:    #0A1520;
+  --navy2:   #0F1923;
+  --navy3:   #1A2E3A;
+  --gold:    #C99400;
+  --gold2:   #E8B830;
+  --teal:    #1D7A6B;
+  --teal2:   #4DB8A8;
+  --linen:   #F0EAD6;
+  --muted:   #8A7A5A;
+  --dim:     #4A5A6A;
+  --body:    #D8CCBA;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: var(--navy);
+  color: var(--linen);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HERO ──────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px 80px;
+  position: relative;
+  text-align: center;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(29,122,107,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(201,148,0,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.brand {
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.1s forwards;
+}
+
+.hero-title {
+  font-size: clamp(42px, 7vw, 80px);
+  color: var(--linen);
+  line-height: 1.05;
+  margin-bottom: 16px;
+  font-weight: 400;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.25s forwards;
+}
+
+.hero-title em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.hero-sub {
+  font-size: clamp(14px, 2vw, 18px);
+  color: var(--muted);
+  font-style: italic;
+  letter-spacing: 1px;
+  margin-bottom: 48px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.4s forwards;
+}
+
+.hero-desc {
+  font-size: 16px;
+  color: var(--body);
+  max-width: 560px;
+  line-height: 1.85;
+  margin: 0 auto 52px;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.55s forwards;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeUp 0.8s ease 0.7s forwards;
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--navy);
+  font-family: Georgia, serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 40px;
+  text-decoration: none;
+  transition: all 0.25s;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.btn-primary:hover { background: var(--gold2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,148,0,0.3); }
+
+.btn-outline {
+  background: none;
+  color: var(--teal2);
+  font-family: Georgia, serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  padding: 13px 30px;
+  border-radius: 40px;
+  text-decoration: none;
+  border: 1.5px solid var(--teal);
+  transition: all 0.25s;
+  text-transform: uppercase;
+}
+.btn-outline:hover { background: rgba(29,122,107,0.15); transform: translateY(-2px); }
+
+.scroll-hint {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: pulse 2s ease infinite;
+}
+
+/* ── DIVIDER ───────────────────────────────────────── */
+.divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto;
+  opacity: 0.5;
+}
+
+/* ── SECTIONS ─────────────────────────────────────── */
+section {
+  padding: 80px 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: clamp(26px, 4vw, 38px);
+  color: var(--linen);
+  text-align: center;
+  margin-bottom: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.section-sub {
+  font-size: 15px;
+  color: var(--muted);
+  text-align: center;
+  font-style: italic;
+  max-width: 500px;
+  margin: 0 auto 52px;
+  line-height: 1.8;
+}
+
+/* ── PROTOCOL BLOCK ────────────────────────────────── */
+.protocol-block {
+  background: var(--navy2);
+  border: 1px solid var(--navy3);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 12px 12px 0;
+  padding: 32px 36px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.protocol-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+}
+
+.protocol-text { flex: 1; min-width: 200px; }
+
+.protocol-title {
+  font-size: 22px;
+  color: var(--linen);
+  margin-bottom: 8px;
+}
+
+.protocol-desc {
+  font-size: 14px;
+  color: var(--body);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.protocol-meta {
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* ── TOOLS GRID ────────────────────────────────────── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.tool-card {
+  background: var(--navy2);
+  border: 1px solid var(--navy3);
+  border-radius: 12px;
+  padding: 28px 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.25s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--teal);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  transform-origin: left;
+}
+
+.tool-card:hover::before { transform: scaleX(1); }
+.tool-card:hover { border-color: var(--teal); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+
+.tool-emoji { font-size: 32px; }
+.tool-title { font-size: 17px; color: var(--linen); }
+.tool-desc { font-size: 13px; color: var(--body); line-height: 1.7; flex: 1; }
+.tool-link-label { font-size: 11px; color: var(--teal2); letter-spacing: 2px; text-transform: uppercase; margin-top: auto; }
+
+/* ── TELEGRAM BLOCK ────────────────────────────────── */
+.telegram-block {
+  background: linear-gradient(135deg, var(--navy2) 0%, rgba(29,122,107,0.12) 100%);
+  border: 1px solid rgba(29,122,107,0.4);
+  border-radius: 16px;
+  padding: 48px 40px;
+  text-align: center;
+}
+
+.telegram-title {
+  font-size: 26px;
+  color: var(--linen);
+  margin-bottom: 12px;
+}
+
+.telegram-desc {
+  font-size: 15px;
+  color: var(--body);
+  max-width: 480px;
+  margin: 0 auto 14px;
+  line-height: 1.8;
+}
+
+.telegram-honest {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 32px;
+}
+
+.telegram-links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1.5px solid rgba(29,122,107,0.6);
+  color: var(--teal2);
+  font-family: Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 11px 22px;
+  border-radius: 30px;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.tg-btn:hover { background: rgba(29,122,107,0.2); border-color: var(--teal2); }
+
+/* ── VERSE FOOTER ──────────────────────────────────── */
+.verse-footer {
+  border-top: 1px solid var(--navy3);
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.verse-text {
+  font-size: 15px;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 2;
+  margin-bottom: 8px;
+}
+
+.verse-ref {
+  font-size: 11px;
+  color: var(--dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.footer-brand {
+  margin-top: 32px;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.privacy {
+  margin-top: 10px;
+  font-size: 10px;
+  color: #2A3A4A;
+  font-style: italic;
+}
+
+/* ── ANIMATIONS ────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.9; }
+}
+
+/* ── RESPONSIVE ────────────────────────────────────── */
+@media (max-width: 600px) {
+  .protocol-block { flex-direction: column; gap: 16px; padding: 24px 20px; }
+  .telegram-block { padding: 32px 20px; }
+  section { padding: 60px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ──────────────────────────────────────────── -->
+<div class="hero">
+  <div class="brand">Wandeln · metamorphousthai · Röm 12,2</div>
+  <h1 class="hero-title">Metamorphose<br>beginnt im <em>Geist</em></h1>
+  <p class="hero-sub">Neurobiologie trifft Neues Testament</p>
+  <p class="hero-desc">
+    Kostenlose Werkzeuge, Audios und ein vollständiges Protokoll
+    zur geistig-emotionalen Regeneration. Kein Programm. Keine Verpflichtung.
+    Nur das was wirklich funktioniert.
+  </p>
+  <div class="hero-cta">
+    <a class="btn-primary" href="https://www.dropbox.com/scl/fi/wpq6kzjimmuos0z5iox1n/sk_geistig_neuro_Regenerationsprotokoll.pdf?rlkey=mytg425arq29tmnillbtekyem&dl=0">
+      Protokoll herunterladen
+    </a>
+    <a class="btn-outline" href="#tools">Werkzeuge ansehen</a>
+  </div>
+  <div class="scroll-hint">↓ &nbsp; entdecken</div>
+</div>
+
+<!-- ── PROTOCOL SECTION ─────────────────────────────── -->
+<section>
+  <div class="section-label">Das Protokoll</div>
+  <h2 class="section-title">Geistig-Emotionales Regenerationsprotokoll</h2>
+  <p class="section-sub">Kostenlos. Open Source. Kein Ersatz für ärztlichen Rat.</p>
+
+  <div class="protocol-block">
+    <div class="protocol-icon">📄</div>
+    <div class="protocol-text">
+      <div class="protocol-title">Protokoll #2 — Neuro-Theologie</div>
+      <div class="protocol-desc">
+        Glutamat-Balance, GABA-Regeneration, Atemarbeit, Vagusnerv — und die Brücke
+        zwischen der Kraft des Gebets und dem was Neurowissenschaftler heute im Hirnscanner messen.
+        Kein Widerspruch. Dieselbe Richtung. Zwei verschiedene Sprachen.
+      </div>
+      <div class="protocol-meta">PDF · Kostenlos · Stefan Kutter · April 2026</div>
+    </div>
+    <a class="btn-primary" style="flex-shrink:0" href="https://www.dropbox.com/scl/fi/wpq6kzjimmuos0z5iox1n/sk_geistig_neuro_Regenerationsprotokoll.pdf?rlkey=mytg425arq29tmnillbtekyem&dl=0">
+      ↓ PDF laden
+    </a>
+  </div>
+</section>
+
+<div style="max-width:960px;margin:0 auto;padding:0 24px"><div class="divider"></div></div>
+
+<!-- ── TOOLS SECTION ────────────────────────────────── -->
+<section id="tools">
+  <div class="section-label">Werkzeuge</div>
+  <h2 class="section-title">Direkt nutzbar — im Browser</h2>
+  <p class="section-sub">Kein Download. Keine Anmeldung. Auf jedem Gerät.</p>
+
+  <div class="tools-grid">
+
+    <a class="tool-card" href="wandeln_atem_timer.html">
+      <div class="tool-emoji">⏱</div>
+      <div class="tool-title">4-7-8 Atemübung</div>
+      <div class="tool-desc">
+        4 Sekunden einatmen · 7 halten · 8 ausatmen.
+        4 Runden. Vagusnerv-Aktivierung in 3 Minuten.
+        Mit optionalem Begleitton.
+      </div>
+      <div class="tool-link-label">▷ Timer starten</div>
+    </a>
+
+    <a class="tool-card" href="wandeln_coherent_breathing.html">
+      <div class="tool-emoji">🌀</div>
+      <div class="tool-title">Coherent Breathing</div>
+      <div class="tool-desc">
+        5,5 Atemzüge pro Minute. HRV-Training für
+        Nervensystem und Konzentration. 5–20 Minuten.
+        Mit Ton und Fortschrittsanzeige.
+      </div>
+      <div class="tool-link-label">▷ Timer starten</div>
+    </a>
+
+    <a class="tool-card" href="wandeln_supplement_rechner.html">
+      <div class="tool-emoji">🧮</div>
+      <div class="tool-title">Supplement-Rechner</div>
+      <div class="tool-desc">
+        Magnesium, Omega-3, Vitamin D+K2, L-Carnitin,
+        R-ALA — personalisiert nach Gewicht, Alter,
+        Geschlecht und Zyklusphase.
+      </div>
+      <div class="tool-link-label">▷ Rechner öffnen</div>
+    </a>
+
+    <a class="tool-card" href="wandeln_planer.html">
+      <div class="tool-emoji">📅</div>
+      <div class="tool-title">Tages- & Wochenplaner</div>
+      <div class="tool-desc">
+        Supplemente, Gewohnheiten, Stimmungsmarker —
+        als interaktive Checkliste. Daten bleiben lokal
+        bei dir. Export als CSV möglich.
+      </div>
+      <div class="tool-link-label">▷ Planer öffnen</div>
+    </a>
+
+  </div>
+</section>
+
+<div style="max-width:960px;margin:0 auto;padding:0 24px"><div class="divider"></div></div>
+
+<!-- ── TELEGRAM SECTION ─────────────────────────────── -->
+<section>
+  <div class="telegram-block">
+    <div class="telegram-title">Audios & Gemeinschaft</div>
+    <p class="telegram-desc">
+      Morgengebet, Morgen-Ausrichtung, Abend-Debriefing und Nacht-Schleife
+      liegen im Telegram-Kanal — kostenlos, auf allen Geräten, ohne Anmeldung
+      außer Telegram selbst.
+    </p>
+    <p class="telegram-honest">
+      Der Kanal ist gerade erst gestartet. Eine gute Zeit um dabei zu sein.
+    </p>
+    <div class="telegram-links">
+      <a class="tg-btn" href="https://t.me/wandeln_geist">
+        📢 Kanal · Ressourcen &amp; Audios
+      </a>
+      <a class="tg-btn" href="https://t.me/wandeln_geist">
+        💬 Gruppe · Austausch &amp; Gebet
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ───────────────────────────────────────── -->
+<div class="verse-footer">
+  <p class="verse-text">
+    „Werdet nicht dieser Welt gleichförmig,<br>
+    sondern verwandelt euch durch die Erneuerung eures Sinnes."
+  </p>
+  <p class="verse-ref">Römer 12,2</p>
+  <p class="footer-brand">Stefan Kutter · Wandeln · 2026</p>
+  <p class="privacy">🔒 Kein Tracking · Keine Cookies · Alle Tool-Daten lokal in deinem Browser</p>
+</div>
+
+</body>
+</html>
