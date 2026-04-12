@@ -89,7 +89,7 @@ body {
   transform: translateX(-50%);
   background: radial-gradient(circle at 35% 35%, #4DB8A8, #1D7A6B);
   box-shadow: 0 0 16px rgba(29,122,107,0.7), 0 0 32px rgba(29,122,107,0.3);
-  top: 0px;
+  top: 97px;
   transition: background 1.5s ease, box-shadow 1.5s ease;
 }
 
@@ -138,7 +138,7 @@ body {
   font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #3A4A5A;
+  color: #6A7A8A;
   min-width: 36px;
 }
 
@@ -181,7 +181,7 @@ body {
   font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #3A4A5A;
+  color: #6A7A8A;
   min-width: 38px;
   text-align: right;
 }
@@ -261,7 +261,7 @@ body {
 .verse {
   margin-top: 20px;
   font-size: 11px;
-  color: #2A1A0A;
+  color: #8A7A5A;
   text-align: center;
   font-style: italic;
   max-width: 240px;
@@ -449,7 +449,7 @@ function stopSession() {
   clearTimeout(pTimer); clearInterval(cTimer);
   try { if (osc) { gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3); osc.stop(ctx.currentTime + 0.3); } } catch(e){}
   ball.style.transition = 'top 0.5s ease';
-  ball.style.top = BALL_TOP + 'px';
+  ball.style.top = '97px';
   ball.className = 'ball';
   phaseTag.textContent = 'Bereit'; phaseTag.className = 'phase-tag';
   cdEl.textContent = '5';
@@ -479,7 +479,7 @@ function resetSession() {
   phaseTag.textContent = 'Bereit'; phaseTag.className = 'phase-tag';
   cdEl.textContent = '5';
   ball.style.transition = 'none';
-  ball.style.top = BALL_TOP + 'px';
+  ball.style.top = '97px';
   ball.className = 'ball';
   startBtn.style.display = 'inline-block';
   stopBtn.style.display = 'none';
