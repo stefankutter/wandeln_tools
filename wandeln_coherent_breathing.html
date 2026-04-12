@@ -419,7 +419,7 @@ function startPhase(p) {
 
 function tick() {
   if (!running) return;
-  elapsed++;
+  elapsed += (phase === 'inhale' ? INHALE : EXHALE);
   if (elapsed >= durMin * 60) { finish(); return; }
   if (phase === 'inhale') {
     startPhase('exhale');
