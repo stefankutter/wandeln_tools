@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wandeln · Resonanz-Atem</title>
+<style>
+:root {
+  --navy:  #0A1520;
+  --navy2: #0F1923;
+  --navy3: #1A2E3A;
+  --gold:  #C99400;
+  --teal:  #1D7A6B;
+  --teal2: #4DB8A8;
+  --linen: #F0EAD6;
+  --muted: #8A7A5A;
+  --dim:   #6A7A8A;
+  --terra: #C05A2A;
+  --terra2:#E87840;
+  --sage:  #4A7A5A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Georgia, serif;
+  background: var(--navy);
+  color: var(--linen);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 20px 40px;
+  overflow-y: auto;
+  user-select: none;
+}
+.brand { font-size: 11px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; text-align: center; }
+.sub { font-size: 11px; color: var(--muted); font-style: italic; margin-bottom: 24px; text-align: center; letter-spacing: 1px; }
+
+/* ── SCREENS ── */
+.screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 340px; }
+.screen.active { display: flex; }
+
+/* ── PROFILE ── */
+.card { background: var(--navy2); border: 1px solid var(--navy3); border-radius: 12px; padding: 20px; width: 100%; margin-bottom: 14px; }
+.card-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+.btn-group { display: flex; gap: 8px; }
+.opt { background: none; border: 1px solid var(--navy3); color: var(--dim); font-family: Georgia, serif; font-size: 13px; padding: 7px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+.opt.active { border-color: var(--gold); color: var(--gold); }
+.slider-row { display: flex; align-items: center; gap: 10px; }
+input[type=range] { flex: 1; -webkit-appearance: none; height: 3px; background: var(--navy3); border-radius: 3px; outline: none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--gold); cursor: pointer; }
+.slider-val { font-size: 15px; color: var(--gold); min-width: 48px; text-align: right; }
+
+.result-box { background: var(--navy3); border-radius: 8px; padding: 14px 16px; width: 100%; margin-bottom: 16px; }
+.result-row { display: flex; justify-content: space-between; align-items: baseline; }
+.result-label { font-size: 11px; color: var(--dim); letter-spacing: 1px; }
+.result-val { font-size: 22px; color: var(--teal2); }
+.result-sub { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.7; font-style: italic; }
+
+/* ── BUTTONS ── */
+.btn { background: none; border: 1.5px solid var(--gold); color: var(--gold); font-family: Georgia, serif; font-size: 13px; letter-spacing: 2px; padding: 11px 28px; border-radius: 30px; cursor: pointer; transition: all 0.25s; text-transform: uppercase; width: 100%; margin-bottom: 10px; }
+.btn:hover { background: var(--gold); color: var(--navy); }
+.btn.teal { border-color: var(--teal); color: var(--teal2); }
+.btn.teal:hover { background: var(--teal); color: var(--linen); }
+.btn.stress { border-color: var(--terra); color: var(--terra2); }
+.btn.stress.active { background: var(--terra); color: var(--linen); }
+.btn-sm { font-size: 11px; letter-spacing: 1px; padding: 8px 20px; margin-bottom: 6px; }
+
+/* ── PACER ── */
+.pacer-wrap { position: relative; width: 200px; height: 200px; margin: 16px auto; }
+.pacer-ring { position: absolute; inset: 0; }
+.pacer-ball { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; border-radius: 50%; transform: translate(-50%, -50%) scale(0.7); transition: transform 0.1s linear, background 1s ease, box-shadow 1s ease; }
+.pacer-ball.inhale {
+  background: radial-gradient(circle at 35% 35%, #4DB8A8, #1D7A6B);
+  box-shadow: 0 0 24px rgba(29,122,107,0.7), 0 0 48px rgba(29,122,107,0.3);
+}
+.pacer-ball.exhale {
+  background: radial-gradient(circle at 35% 35%, #E8B830, #C99400);
+  box-shadow: 0 0 24px rgba(201,148,0,0.6), 0 0 48px rgba(201,148,0,0.2);
+}
+.pacer-ball.stress-inhale {
+  background: radial-gradient(circle at 35% 35%, #E8A060, #C05A2A);
+  box-shadow: 0 0 24px rgba(192,90,42,0.7);
+}
+.pacer-ball.stress-exhale {
+  background: radial-gradient(circle at 35% 35%, #C8806A, #8A3A1A);
+  box-shadow: 0 0 24px rgba(138,58,26,0.6);
+}
+
+.phase-label { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 6px; min-height: 18px; }
+.phase-count { font-size: 56px; text-align: center; color: var(--linen); line-height: 1; margin-bottom: 4px; }
+.round-info { font-size: 11px; color: var(--dim); text-align: center; letter-spacing: 1px; margin-bottom: 16px; }
+
+/* ── PROGRESS ── */
+.progress-bar-bg { width: 100%; height: 3px; background: var(--navy3); border-radius: 3px; margin-bottom: 18px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(to right, var(--teal), var(--gold)); border-radius: 3px; transition: width 1s linear; width: 0%; }
+
+/* ── FEELING ── */
+.feeling-title { font-size: 13px; color: var(--linen); text-align: center; margin-bottom: 14px; line-height: 1.7; }
+.feeling-opts { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.feel-btn { background: none; border: 1px solid var(--navy3); color: var(--body); font-family: Georgia, serif; font-size: 13px; padding: 12px 16px; border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s; }
+.feel-btn:hover, .feel-btn.selected { border-color: var(--teal); color: var(--teal2); background: rgba(29,122,107,0.1); }
+
+/* ── RESULT BOX ── */
+.freq-display { background: var(--navy2); border: 2px solid var(--teal); border-radius: 12px; padding: 20px; width: 100%; text-align: center; margin-bottom: 16px; }
+.freq-big { font-size: 48px; color: var(--teal2); line-height: 1; }
+.freq-unit { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.freq-phase { font-size: 14px; color: var(--gold); margin-top: 8px; }
+
+/* ── STRESS MODE ── */
+.stress-banner { background: rgba(192,90,42,0.15); border: 1px solid var(--terra); border-radius: 8px; padding: 10px 14px; width: 100%; font-size: 12px; color: var(--terra2); text-align: center; margin-bottom: 12px; line-height: 1.7; }
+
+/* ── MISC ── */
+.dur-btn {
+  background: none;
+  border: 1px solid var(--navy3);
+  color: var(--dim);
+  font-family: Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 5px 14px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+.dur-btn.active, .dur-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+
+.mood-row { display: flex; gap: 8px; width: 100%; margin-top: 6px; }
+.mood-btn { background: none; border: 1px solid var(--navy3); color: var(--dim);
+  font-family: Georgia, serif; font-size: 12px; padding: 6px 8px; border-radius: 16px;
+  cursor: pointer; transition: all 0.2s; flex: 1; text-align: center; }
+.mood-btn.active { border-color: var(--gold); color: var(--gold); }
+
+.info-btn { background: none; border: 1px solid var(--navy3); color: var(--dim);
+  font-size: 12px; padding: 2px 8px; border-radius: 10px; cursor: pointer;
+  margin-left: 8px; vertical-align: middle; }
+
+.info-overlay { display: none; background: var(--navy2); border: 1px solid var(--navy3);
+  border-radius: 12px; padding: 18px; width: 100%; margin-bottom: 14px; }
+.info-overlay.visible { display: block; }
+.info-overlay p { font-size: 12px; color: var(--body); line-height: 1.85; margin-bottom: 10px; }
+.info-overlay p:last-child { margin-bottom: 0; }
+.info-close { font-size: 11px; color: var(--dim); cursor: pointer; text-align: right;
+  display: block; margin-top: 8px; letter-spacing: 1px; }
+
+.verse { font-size: 11px; color: var(--muted); text-align: center; font-style: italic; max-width: 260px; line-height: 1.9; margin-top: 16px; }
+.note { font-size: 11px; color: var(--dim); text-align: center; line-height: 1.8; margin-bottom: 10px; }
+.divider { width: 100%; height: 1px; background: var(--navy3); margin: 14px 0; }
+</style>
+</head>
+<body>
+
+<div class="brand">Wandeln</div>
+<div class="sub">Resonanz-Atmung · Individuell kalibriert</div>
+
+<!-- ── SCREEN 1: PROFIL ── -->
+<div class="screen active" id="s-profile">
+  <div class="card">
+    <div class="card-title">Dein Profil</div>
+
+    <div class="field">
+      <label>Geschlecht</label>
+      <div class="btn-group">
+        <button class="opt active" onclick="setSex('m',this)">Männlich</button>
+        <button class="opt" onclick="setSex('f',this)">Weiblich</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Körpergröße</label>
+      <div class="slider-row">
+        <input type="range" id="heightSlider" min="145" max="210" value="170"
+          oninput="updateHeight(this.value)">
+        <div class="slider-val" id="heightVal">170 cm</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Aktueller Zustand</label>
+      <div class="mood-row">
+        <button class="mood-btn" onclick="setMood(-15,this)">☕ Aufgedreht</button>
+        <button class="mood-btn active" onclick="setMood(0,this)">✦ Normal</button>
+        <button class="mood-btn" onclick="setMood(15,this)">🧘 Tief ruhig</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-overlay" id="infoOverlay">
+    <p>☕ <strong style="color:var(--gold)">Fühlt sich der Rhythmus zu langsam an?</strong></p>
+    <p>Zwei häufige Gründe:</p>
+    <p>☕ Dein Nervensystem läuft gerade auf Hochtouren — Stress, Koffein, Hektik. Wähle "Aufgedreht" als Startpunkt. Der Körper findet seinen Rhythmus von dort aus nach unten.</p>
+    <p>🫁 Brust statt Bauch — bei reiner Brustatmung reicht die Luft nicht. Lass den Bauch sich beim Einatmen weit nach vorne wölben — wie ein Ballon. Das Zwerchfell massiert dabei den Vagusnerv direkt. Jeder Atemzug signalisiert: alles sicher.</p>
+    <p>💡 Größere Menschen atmen langsamer — ihr Gefäßsystem ist länger, die Resonanz tiefer. Das ist Physiologie, kein Fehler.</p>
+    <span class="info-close" onclick="toggleInfo()">Schließen ✕</span>
+  </div>
+
+  <div class="result-box">
+    <div class="result-row">
+      <div class="result-label">Geschätzte Resonanzfrequenz <button class="info-btn" onclick="toggleInfo()">ℹ</button></div>
+      <div class="result-val" id="rfDisplay">5.0 BPM</div>
+    </div>
+    <div class="result-row" style="margin-top:6px">
+      <div class="result-label">Phasendauer</div>
+      <div style="font-size:15px;color:var(--gold)" id="phaseDisplay">6.0s / 6.0s</div>
+    </div>
+    <div class="result-sub">
+      Formel: Hasuo et al., Applied Psychophysiology 2023 · R²≈0.5 · 
+      Calibrierung verfeinert den Wert individuell.
+    </div>
+  </div>
+
+  <button class="btn" onclick="startCalibration()">Kalibrierung starten (3 × 2 Min)</button>
+  <button class="btn teal btn-sm" onclick="skipToBreathing()">Direkt atmen (ohne Kalibrierung)</button>
+</div>
+
+<!-- ── SCREEN 2: CALIBRATION ── -->
+<div class="screen" id="s-calib">
+  <div class="round-info" id="calibRoundInfo">Runde 1 von 3</div>
+
+  <div class="pacer-wrap">
+    <canvas class="pacer-ring" id="calibCanvas" width="200" height="200"></canvas>
+    <div class="pacer-ball inhale" id="calibBall"></div>
+  </div>
+
+  <div class="phase-label" id="calibPhase">Einatmen</div>
+  <div class="phase-count" id="calibCount">6</div>
+
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="calibProgress"></div>
+  </div>
+
+  <div class="note" id="calibNote">Atme ruhig mit dem Ball. Wie fühlt es sich an?</div>
+  <div class="note" style="color:var(--gold)" id="calibHz"></div>
+</div>
+
+<!-- ── SCREEN 3: FEELING ── -->
+<div class="screen" id="s-feeling">
+  <div class="feeling-title" id="feelingTitle">
+    Runde 1 abgeschlossen.<br>Wie hat sich die Atmung angefühlt?
+  </div>
+  <div class="feeling-opts">
+    <button class="feel-btn" onclick="selectFeeling('flow')">🌊 Flow — angenehm, mühelos</button>
+    <button class="feel-btn" onclick="selectFeeling('breath')">😮 Leichte Luftnot — etwas zu langsam</button>
+    <button class="feel-btn" onclick="selectFeeling('fast')">⚡ Unruhe — etwas zu schnell</button>
+    <button class="feel-btn" onclick="selectFeeling('ok')">😐 Neutral — schwer zu sagen</button>
+  </div>
+</div>
+
+<!-- ── SCREEN 4: RESULT ── -->
+<div class="screen" id="s-result">
+  <div class="note">Kalibrierung abgeschlossen.</div>
+
+  <div class="freq-display">
+    <div class="freq-big" id="resultRF">5.0</div>
+    <div class="freq-unit">Atemzüge pro Minute</div>
+    <div class="freq-phase" id="resultPhase">6.0s ein · 6.0s aus</div>
+  </div>
+
+  <div class="note">
+    Notiere diesen Wert für andere Geräte.<br>
+    Die Resonanzfrequenz kann sich täglich leicht ändern.
+  </div>
+
+  <button class="btn" onclick="startBreathing()">Jetzt atmen</button>
+  <button class="btn teal btn-sm" onclick="goToProfile()">Neu kalibrieren</button>
+</div>
+
+<!-- ── SCREEN 5: BREATHING ── -->
+<div class="screen" id="s-breathing">
+  <div class="freq-display" style="margin-bottom:12px;padding:12px">
+    <div style="font-size:11px;color:var(--dim);text-align:center;margin-bottom:2px">Deine Frequenz</div>
+    <div style="display:flex;justify-content:center;gap:20px;align-items:baseline">
+      <span id="breathRF" style="font-size:22px;color:var(--teal2)">5.0 BPM</span>
+      <span id="breathPhase" style="font-size:13px;color:var(--gold)">6.0s / 6.0s</span>
+    </div>
+  </div>
+
+  <div id="stressBanner" class="stress-banner" style="display:none">
+    Verlängerte Ausatmung · +1 Sek. extra Vagus-Aktivierung
+  </div>
+
+  <div class="pacer-wrap">
+    <canvas class="pacer-ring" id="breathCanvas" width="200" height="200"></canvas>
+    <div class="pacer-ball inhale" id="breathBall"></div>
+  </div>
+
+  <div class="phase-label" id="breathPhaseLabel">Einatmen</div>
+  <div class="phase-count" id="breathCount">6</div>
+
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="breathProgress"></div>
+  </div>
+
+  <div class="round-info" id="breathInfo">0 Zyklen · 5 Min</div>
+
+  <div style="display:flex;gap:8px;width:100%;margin-bottom:10px">
+    <button class="dur-btn active" onclick="setBreathDur(5,this)">5 min</button>
+    <button class="dur-btn" onclick="setBreathDur(10,this)">10 min</button>
+    <button class="dur-btn" onclick="setBreathDur(15,this)">15 min</button>
+  </div>
+
+  <div style="display:flex;gap:8px;width:100%;margin-bottom:8px">
+    <button class="btn btn-sm" id="breathBtn" onclick="toggleBreath()" style="flex:1">Start</button>
+    <button class="btn stress btn-sm" id="stressBtn" onclick="toggleStress()" style="flex:1">🆘 Anti-Stress</button>
+  </div>
+
+  <div style="display:flex;gap:8px;width:100%">
+    <button class="btn teal btn-sm" onclick="goToProfile()" style="flex:1">Neu kalibrieren</button>
+  </div>
+
+  <div class="verse">
+    „Der Friede Gottes, der allen Verstand übersteigt,<br>
+    wird eure Herzen bewachen."<br>Phil 4,7
+  </div>
+</div>
+
+<!-- ── SCREEN 6: DONE ── -->
+<div class="screen" id="s-done">
+  <div style="font-size:20px;color:var(--gold);letter-spacing:2px;margin-bottom:12px;text-align:center">Session abgeschlossen</div>
+  <div class="note" id="doneInfo" style="margin-bottom:16px"></div>
+  <button class="btn" onclick="resetBreathing()">Nochmal</button>
+  <button class="btn teal btn-sm" onclick="goToProfile()">Neu kalibrieren</button>
+  <div class="verse">„Der Herr ist nahe." · Phil 4,5</div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────
+var sex = 'm', height = 170;
+
+var moodOffset = 0;
+
+function setMood(offset, el) {
+  moodOffset = offset;
+  document.querySelectorAll('.mood-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  updateDisplay();
+}
+
+function toggleInfo() {
+  var o = document.getElementById('infoOverlay');
+  o.classList.toggle('visible');
+}
+
+var calibRound = 0;
+var calibFreqs = [], calibFeelings = [];
+var finalRF = 5.5;
+var stressMode = false;
+var exhaleBoost = false;
+var breathRunning = false;
+var breathCycles = 0, breathElapsed = 0;
+var breathDurMin = 5;
+
+// Audio — single oscillator reused
+var actx = null, osc = null, gainNode = null;
+var audioReady = false;
+
+function initAudio() {
+  if (audioReady) return;
+  try {
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    gainNode = actx.createGain();
+    gainNode.gain.setValueAtTime(0, actx.currentTime);
+    gainNode.connect(actx.destination);
+    osc = actx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(174, actx.currentTime);
+    osc.connect(gainNode);
+    osc.start();
+    audioReady = true;
+  } catch(e) {}
+}
+
+function playTone(freq, durSec) {
+  if (!audioReady || !actx) return;
+  var t = actx.currentTime;
+  osc.frequency.setValueAtTime(freq, t);
+  gainNode.gain.cancelScheduledValues(t);
+  gainNode.gain.setValueAtTime(0, t);
+  gainNode.gain.linearRampToValueAtTime(0.08, t + 0.5);
+  gainNode.gain.linearRampToValueAtTime(0.05, t + durSec - 1);
+  gainNode.gain.linearRampToValueAtTime(0, t + durSec - 0.1);
+}
+
+function silenceTone() {
+  if (!audioReady || !actx) return;
+  var t = actx.currentTime;
+  gainNode.gain.cancelScheduledValues(t);
+  gainNode.gain.linearRampToValueAtTime(0, t + 0.3);
+}
+
+// ── FORMULAS ─────────────────────────────────────────
+function calcRF(s, h) {
+  var h_eff = h + (typeof moodOffset !== "undefined" ? moodOffset : 0);
+  var rf = s === 'm' ? (17.90 - 0.07 * h_eff) : (15.88 - 0.06 * h_eff);
+  return Math.round(Math.max(4.0, Math.min(7.0, rf)) * 10) / 10;
+}
+function rfToPhase(rf) { return Math.round((30 / rf) * 10) / 10; }
+
+// ── PROFILE SCREEN ────────────────────────────────────
+function setSex(s, el) {
+  sex = s;
+  document.querySelectorAll('.opt').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  updateDisplay();
+}
+function updateHeight(v) {
+  height = parseInt(v);
+  document.getElementById('heightVal').textContent = v + ' cm';
+  updateDisplay();
+}
+function updateDisplay() {
+  var rf = calcRF(sex, height);
+  var ph = rfToPhase(rf);
+  document.getElementById('rfDisplay').textContent = rf.toFixed(1) + ' BPM';
+  document.getElementById('phaseDisplay').textContent = ph.toFixed(1) + 's / ' + ph.toFixed(1) + 's';
+}
+document.getElementById('heightSlider').addEventListener('input', function() { updateHeight(this.value); });
+updateDisplay();
+
+// ── CALIBRATION ───────────────────────────────────────
+var calibTimer = null, calibPhaseTimer = null;
+var calibElapsed = 0, calibPhase = 'inhale', calibSec = 0;
+var calibInSec, calibOutSec;
+
+var CAL_OFFSETS = [0, 0.5, -0.5]; // round 1 = base, 2 = slower (+0.5s/phase), 3 = faster (-0.5s/phase)
+
+function getCalibRF(round) {
+  var base = calcRF(sex, height);
+  var rf = base + CAL_OFFSETS[round];
+  return Math.round(Math.max(4.0, Math.min(7.0, rf)) * 10) / 10;
+}
+
+function startCalibration() {
+  calibRound = 0;
+  calibFreqs = [];
+  calibFeelings = [];
+  runCalibRound();
+}
+
+function runCalibRound() {
+  show('s-calib');
+  var rf = getCalibRF(calibRound);
+  calibFreqs.push(rf);
+  var ph = rfToPhase(rf);
+  calibInSec = ph;
+  calibOutSec = ph;
+  calibElapsed = 0;
+  calibPhase = 'inhale';
+  calibSec = Math.round(calibInSec);
+
+  document.getElementById('calibRoundInfo').textContent = 'Runde ' + (calibRound+1) + ' von 3';
+  document.getElementById('calibHz').textContent = rf.toFixed(1) + ' BPM · ' + ph.toFixed(1) + 's ein / ' + ph.toFixed(1) + 's aus';
+
+  initAudio();
+  runCalibPhase();
+}
+
+function runCalibPhase() {
+  var durSec = calibPhase === 'inhale' ? calibInSec : calibOutSec;
+  var label = calibPhase === 'inhale' ? 'Einatmen' : 'Ausatmen';
+  document.getElementById('calibPhase').textContent = label;
+  document.getElementById('calibBall').className = 'pacer-ball ' + calibPhase;
+  animateBall('calibBall', calibPhase, durSec);
+  playTone(calibPhase === 'inhale' ? 174 : 136, durSec);
+
+  calibSec = Math.round(durSec);
+  document.getElementById('calibCount').textContent = calibSec;
+  var ticker = setInterval(function() {
+    calibSec--;
+    if (calibSec >= 0) document.getElementById('calibCount').textContent = calibSec;
+  }, 1000);
+
+  calibPhaseTimer = setTimeout(function() {
+    clearInterval(ticker);
+    calibElapsed += durSec;
+    var total = 120; // 2 min
+    document.getElementById('calibProgress').style.width = Math.min((calibElapsed / total) * 100, 100) + '%';
+
+    if (calibElapsed >= total) {
+      show('s-feeling');
+      document.getElementById('feelingTitle').textContent =
+        'Runde ' + (calibRound+1) + ' abgeschlossen.\nWie hat sich die Atmung angefühlt?';
+    } else {
+      calibPhase = calibPhase === 'inhale' ? 'exhale' : 'inhale';
+      runCalibPhase();
+    }
+  }, durSec * 1000);
+}
+
+function selectFeeling(f) {
+  calibFeelings.push(f);
+  calibRound++;
+  if (calibRound < 3) {
+    document.getElementById('calibProgress').style.width = '0%';
+    runCalibRound();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  // Pick best: prefer 'flow', then 'ok', then first
+  var best = null;
+  for (var i = 0; i < calibFeelings.length; i++) {
+    if (calibFeelings[i] === 'flow') { best = calibFreqs[i]; break; }
+  }
+  if (!best) {
+    for (var i = 0; i < calibFeelings.length; i++) {
+      if (calibFeelings[i] === 'ok') { best = calibFreqs[i]; break; }
+    }
+  }
+  if (!best) best = calibFreqs[0];
+
+  finalRF = best;
+  var ph = rfToPhase(finalRF);
+  document.getElementById('resultRF').textContent = finalRF.toFixed(1);
+  document.getElementById('resultPhase').textContent = ph.toFixed(1) + 's ein · ' + ph.toFixed(1) + 's aus';
+  show('s-result');
+}
+
+function skipToBreathing() {
+  finalRF = calcRF(sex, height);
+  startBreathing();
+}
+
+// ── BREATHING SCREEN ──────────────────────────────────
+var bPhaseTimer = null, bTickTimer = null;
+var bPhase = 'inhale', bSec = 0, bInSec, bOutSec;
+
+function startBreathing() {
+  var ph = rfToPhase(finalRF);
+  bInSec = ph;
+  bOutSec = ph;
+  document.getElementById('breathRF').textContent = finalRF.toFixed(1) + ' BPM';
+  document.getElementById('breathPhase').textContent = ph.toFixed(1) + 's / ' + ph.toFixed(1) + 's';
+
+  breathCycles = 0; breathElapsed = 0;
+  breathDurMin = 5;
+  stressMode = false;
+  exhaleBoost = false;
+  document.getElementById('stressBanner').style.display = 'none';
+  document.getElementById('stressBtn').classList.remove('active');
+  var eb = document.getElementById('exhaleBtn');
+  if(eb){eb.style.background='none';eb.style.color='var(--teal2)';}
+
+  // Ball center
+  var ball = document.getElementById('breathBall');
+  ball.style.transform = 'translate(-50%, -50%) scale(0.85)';
+  ball.className = 'pacer-ball inhale';
+
+  document.getElementById('breathProgress').style.width = '0%';
+  document.getElementById('breathInfo').textContent = '0 Zyklen · 5 Min';
+  // reset dur buttons
+  document.querySelectorAll('.dur-btn').forEach(function(b){ b.classList.remove('active'); });
+  var durBtns = document.querySelectorAll('.dur-btn'); if(durBtns[0]) durBtns[0].classList.add('active');
+  document.getElementById('breathBtn').textContent = 'Start';
+  breathRunning = false;
+  show('s-breathing');
+}
+
+function toggleBreath() {
+  if (!breathRunning) {
+    initAudio();
+    breathRunning = true;
+    document.getElementById('breathBtn').textContent = 'Pause';
+    bPhase = 'inhale';
+    runBPhase();
+  } else {
+    breathRunning = false;
+    clearTimeout(bPhaseTimer);
+    clearInterval(bTickTimer);
+    silenceTone();
+    document.getElementById('breathBtn').textContent = 'Weiter';
+  }
+}
+
+function setBreathDur(min, el) {
+  if (stressMode) return; // stress mode locks to 15
+  breathDurMin = min;
+  document.querySelectorAll('.dur-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  updateBreathInfo();
+}
+
+function updateBreathInfo() {
+  document.getElementById('breathInfo').textContent = breathCycles + ' Zyklen · ' + breathDurMin + ' Min';
+}
+
+function toggleExhaleBoost() {
+  exhaleBoost = !exhaleBoost;
+  var btn = document.getElementById('exhaleBtn');
+  var ph = rfToPhase(finalRF);
+  if (exhaleBoost) {
+    bOutSec = ph + 1;
+    btn.style.background = 'var(--teal)';
+    btn.style.color = 'var(--navy)';
+  } else {
+    bOutSec = stressMode ? Math.round(ph * 2 * 0.6 * 10)/10 : ph;
+    btn.style.background = 'none';
+    btn.style.color = 'var(--teal2)';
+  }
+  document.getElementById('breathPhase').textContent = bInSec.toFixed(1) + 's / ' + bOutSec.toFixed(1) + 's';
+}
+
+function toggleStress() {
+  stressMode = !stressMode;
+  var ph = rfToPhase(finalRF);
+  if (stressMode) {
+    bInSec = ph;
+    bOutSec = Math.round((ph + 1) * 10) / 10;
+    breathDurMin = 15;
+    // visually select 15min button
+    document.querySelectorAll('.dur-btn').forEach(function(b){ b.classList.remove('active'); });
+    var btns = document.querySelectorAll('.dur-btn');
+    if(btns[2]) btns[2].classList.add('active');
+    document.getElementById('stressBanner').style.display = 'block';
+    document.getElementById('stressBtn').classList.add('active');
+  } else {
+    bInSec = ph; bOutSec = ph;
+    breathDurMin = 5;
+    document.querySelectorAll('.dur-btn').forEach(function(b){ b.classList.remove('active'); });
+    var btns = document.querySelectorAll('.dur-btn');
+    if(btns[0]) btns[0].classList.add('active');
+    document.getElementById('stressBanner').style.display = 'none';
+    document.getElementById('stressBtn').classList.remove('active');
+  }
+  document.getElementById('breathPhase').textContent = bInSec.toFixed(1) + 's / ' + bOutSec.toFixed(1) + 's';
+  updateBreathInfo();
+}
+
+function runBPhase() {
+  if (!breathRunning) return;
+  var durSec = bPhase === 'inhale' ? bInSec : bOutSec;
+  var label = bPhase === 'inhale' ? 'Einatmen' : 'Ausatmen';
+  var ballClass = stressMode
+    ? (bPhase === 'inhale' ? 'pacer-ball stress-inhale' : 'pacer-ball stress-exhale')
+    : (bPhase === 'inhale' ? 'pacer-ball inhale' : 'pacer-ball exhale');
+
+  document.getElementById('breathPhaseLabel').textContent = label;
+  document.getElementById('breathBall').className = ballClass;
+  animateBall('breathBall', bPhase, durSec);
+  playTone(bPhase === 'inhale' ? 174 : 136, durSec);
+
+  bSec = Math.round(durSec);
+  document.getElementById('breathCount').textContent = bSec;
+  clearInterval(bTickTimer);
+  bTickTimer = setInterval(function() {
+    bSec--;
+    if (bSec >= 0) document.getElementById('breathCount').textContent = bSec;
+  }, 1000);
+
+  bPhaseTimer = setTimeout(function() {
+    clearInterval(bTickTimer);
+    breathElapsed += durSec;
+    if (bPhase === 'exhale') {
+      breathCycles++;
+      var totalSec = breathDurMin * 60;
+      document.getElementById('breathProgress').style.width = Math.min((breathElapsed / totalSec) * 100, 100) + '%';
+      var minsLeft = Math.max(0, Math.ceil((totalSec - breathElapsed) / 60));
+      document.getElementById('breathInfo').textContent = breathCycles + ' Zyklen · noch ~' + minsLeft + ' Min';
+      if (breathElapsed >= totalSec) { finishBreathing(); return; }
+    }
+    bPhase = bPhase === 'inhale' ? 'exhale' : 'inhale';
+    runBPhase();
+  }, durSec * 1000);
+}
+
+function finishBreathing() {
+  breathRunning = false;
+  clearTimeout(bPhaseTimer); clearInterval(bTickTimer);
+  silenceTone();
+  document.getElementById('doneInfo').textContent =
+    breathDurMin + ' Minuten · ' + breathCycles + ' Atemzyklen\nDein Vagusnerv ist aktiv.';
+  show('s-done');
+}
+
+function resetBreathing() { startBreathing(); }
+
+// ── BALL ANIMATION ────────────────────────────────────
+function animateBall(id, phase, durSec) {
+  var ball = document.getElementById(id);
+  var scale = phase === 'inhale' ? 1.0 : 0.7;
+  ball.style.transition = 'transform ' + durSec + 's cubic-bezier(0.45,0,0.55,1), background 1s ease, box-shadow 1s ease';
+  ball.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+}
+
+// ── NAV ───────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+function goToProfile() {
+  clearTimeout(bPhaseTimer); clearTimeout(calibPhaseTimer);
+  clearInterval(bTickTimer); breathRunning = false;
+  silenceTone();
+  show('s-profile');
+}
+</script>
+</body>
+</html>
