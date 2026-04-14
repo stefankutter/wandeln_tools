@@ -70,7 +70,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
 /* ── PACER ── */
 .pacer-wrap { position: relative; width: 200px; height: 200px; margin: 16px auto; }
 .pacer-ring { position: absolute; inset: 0; }
-.pacer-ball { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; border-radius: 50%; transform: translate(-50%, -50%) scale(0.7); transition: transform 0.1s linear, background 1s ease, box-shadow 1s ease; }
+.pacer-ball { position: absolute; left: 50%; top: 50%; width: 80px; height: 80px; border-radius: 50%; transform: translate(-50%, -50%) scale(0.65); transition: transform 0.1s linear, background 1s ease, box-shadow 1s ease; }
 .pacer-ball.inhale {
   background: radial-gradient(circle at 35% 35%, #4DB8A8, #1D7A6B);
   box-shadow: 0 0 24px rgba(29,122,107,0.7), 0 0 48px rgba(29,122,107,0.3);
@@ -348,7 +348,6 @@ var calibRound = 0;
 var calibFreqs = [], calibFeelings = [];
 var finalRF = 5.5;
 var stressMode = false;
-var exhaleBoost = false;
 var breathRunning = false;
 var breathCycles = 0, breathElapsed = 0;
 var breathDurMin = 5;
@@ -570,15 +569,12 @@ function startBreathing() {
   breathCycles = 0; breathElapsed = 0;
   breathDurMin = 5;
   stressMode = false;
-  exhaleBoost = false;
   document.getElementById('stressBanner').style.display = 'none';
   document.getElementById('stressBtn').classList.remove('active');
-  var eb = document.getElementById('exhaleBtn');
-  if(eb){eb.style.background='none';eb.style.color='var(--teal2)';}
 
   // Ball center
   var ball = document.getElementById('breathBall');
-  ball.style.transform = 'translate(-50%, -50%) scale(0.85)';
+  ball.style.transform = 'translate(-50%, -50%) scale(0.82)';
   ball.className = 'pacer-ball inhale';
 
   document.getElementById('breathProgress').style.width = '0%';
@@ -617,22 +613,6 @@ function setBreathDur(min, el) {
 
 function updateBreathInfo() {
   document.getElementById('breathInfo').textContent = breathCycles + ' Zyklen · ' + breathDurMin + ' Min';
-}
-
-function toggleExhaleBoost() {
-  exhaleBoost = !exhaleBoost;
-  var btn = document.getElementById('exhaleBtn');
-  var ph = rfToPhase(finalRF);
-  if (exhaleBoost) {
-    bOutSec = ph + 1;
-    btn.style.background = 'var(--teal)';
-    btn.style.color = 'var(--navy)';
-  } else {
-    bOutSec = stressMode ? Math.round(ph * 2 * 0.6 * 10)/10 : ph;
-    btn.style.background = 'none';
-    btn.style.color = 'var(--teal2)';
-  }
-  document.getElementById('breathPhase').textContent = bInSec.toFixed(1) + 's / ' + bOutSec.toFixed(1) + 's';
 }
 
 function toggleStress() {
@@ -712,7 +692,7 @@ function resetBreathing() { startBreathing(); }
 // ── BALL ANIMATION ────────────────────────────────────
 function animateBall(id, phase, durSec) {
   var ball = document.getElementById(id);
-  var scale = phase === 'inhale' ? 1.0 : 0.7;
+  var scale = phase === 'inhale' ? 1.0 : 0.65;
   ball.style.transition = 'transform ' + durSec + 's cubic-bezier(0.45,0,0.55,1), background 1s ease, box-shadow 1s ease';
   ball.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
 }
