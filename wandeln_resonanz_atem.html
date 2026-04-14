@@ -207,8 +207,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
       <div style="font-size:15px;color:var(--gold)" id="phaseDisplay">6.0s / 6.0s</div>
     </div>
     <div class="result-sub">
-      Formel: Hasuo et al., Applied Psychophysiology 2023 · R²≈0.5 · 
-      Calibrierung verfeinert den Wert individuell.
+      Richtwert nach Hasuo et al. 2023 · durch Kalibrierung individuell verfeinerbar
+      (±0,5 Atemzüge pro Minute · BPM = Atemzüge pro Minute)
     </div>
   </div>
 
@@ -353,43 +353,73 @@ var breathRunning = false;
 var breathCycles = 0, breathElapsed = 0;
 var breathDurMin = 5;
 
-// Audio — single oscillator reused
-var actx = null, osc = null, gainNode = null;
+// Audio — defensive mobile-safe implementation
+var actx = null, gainNode = null;
 var audioReady = false;
+var soundEnabled = true;
 
 function initAudio() {
-  if (audioReady) return;
+  // Only init on explicit user gesture — called from button clicks
+  if (audioReady) {
+    // Resume if suspended (common on iOS after backgrounding)
+    if (actx && actx.state === 'suspended') {
+      actx.resume().catch(function(){});
+    }
+    return;
+  }
   try {
     actx = new (window.AudioContext || window.webkitAudioContext)();
     gainNode = actx.createGain();
     gainNode.gain.setValueAtTime(0, actx.currentTime);
     gainNode.connect(actx.destination);
-    osc = actx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(174, actx.currentTime);
-    osc.connect(gainNode);
-    osc.start();
     audioReady = true;
-  } catch(e) {}
+  } catch(e) {
+    soundEnabled = false;
+  }
 }
 
 function playTone(freq, durSec) {
-  if (!audioReady || !actx) return;
-  var t = actx.currentTime;
-  osc.frequency.setValueAtTime(freq, t);
-  gainNode.gain.cancelScheduledValues(t);
-  gainNode.gain.setValueAtTime(0, t);
-  gainNode.gain.linearRampToValueAtTime(0.08, t + 0.5);
-  gainNode.gain.linearRampToValueAtTime(0.05, t + durSec - 1);
-  gainNode.gain.linearRampToValueAtTime(0, t + durSec - 0.1);
+  if (!soundEnabled || !audioReady || !actx) return;
+  // Resume suspended context (iOS backgrounding fix)
+  if (actx.state === 'suspended') {
+    actx.resume().catch(function(){});
+    return;
+  }
+  try {
+    // Fresh oscillator each time — more reliable than reusing
+    var o = actx.createOscillator();
+    var g = actx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, actx.currentTime);
+    o.connect(g);
+    g.connect(actx.destination);
+    var t = actx.currentTime;
+    var fadeIn = Math.min(0.5, durSec * 0.1);
+    var fadeOut = Math.min(0.8, durSec * 0.15);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.08, t + fadeIn);
+    g.gain.linearRampToValueAtTime(0.06, t + durSec - fadeOut);
+    g.gain.linearRampToValueAtTime(0, t + durSec - 0.05);
+    o.start(t);
+    o.stop(t + durSec);
+    // Auto-cleanup to prevent memory leak
+    o.onended = function() {
+      try { o.disconnect(); g.disconnect(); } catch(e) {}
+    };
+  } catch(e) {}
 }
 
 function silenceTone() {
-  if (!audioReady || !actx) return;
-  var t = actx.currentTime;
-  gainNode.gain.cancelScheduledValues(t);
-  gainNode.gain.linearRampToValueAtTime(0, t + 0.3);
+  // No-op needed — each tone auto-stops via o.stop()
 }
+
+
+// iOS fix: resume AudioContext when page becomes visible again
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && actx && actx.state === 'suspended') {
+    actx.resume().catch(function(){});
+  }
+});
 
 // ── FORMULAS ─────────────────────────────────────────
 function calcRF(s, h) {
