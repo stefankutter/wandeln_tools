@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geistliche Prinzipien im Matthäusevangelium – Wandeln</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+  body {
+    background: #1a1a2e;
+    color: #f5f1e8;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 22px 32px 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+  h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: 0.3px;
+  }
+  .subtitle {
+    font-size: 12px;
+    opacity: 0.6;
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  #reset {
+    position: absolute;
+    top: 22px;
+    right: 32px;
+    background: transparent;
+    color: #f5f1e8;
+    border: 1px solid rgba(245, 241, 232, 0.3);
+    padding: 7px 14px;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    z-index: 10;
+    transition: all 0.2s;
+  }
+  #reset:hover {
+    background: rgba(245, 241, 232, 0.08);
+    border-color: rgba(245, 241, 232, 0.6);
+  }
+  svg { width: 100vw; height: 100vh; display: block; cursor: grab; }
+  svg:active { cursor: grabbing; }
+  .cluster-label {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 19px;
+    font-weight: 600;
+    fill: #f5f1e8;
+    pointer-events: none;
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke: #1a1a2e;
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+  .tooltip {
+    position: fixed;
+    background: rgba(20, 20, 36, 0.97);
+    border: 1px solid rgba(245, 241, 232, 0.22);
+    border-radius: 4px;
+    padding: 12px 16px;
+    max-width: 420px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    font-size: 13px;
+    line-height: 1.55;
+    z-index: 20;
+    color: #f5f1e8;
+  }
+  .tooltip .ref {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 6px;
+    display: block;
+    letter-spacing: 0.2px;
+  }
+  .tooltip .text {
+    opacity: 0.82;
+    font-style: italic;
+    font-weight: 300;
+  }
+  .legend {
+    position: absolute;
+    bottom: 20px;
+    left: 32px;
+    font-size: 11px;
+    opacity: 0.5;
+    max-width: 340px;
+    line-height: 1.6;
+    pointer-events: none;
+    letter-spacing: 0.2px;
+  }
+  @media (max-width: 640px) {
+    header { padding: 16px 20px 0; }
+    h1 { font-size: 20px; }
+    .subtitle { font-size: 10px; }
+    #reset { top: 16px; right: 20px; padding: 6px 10px; font-size: 10px; }
+    .legend { left: 20px; right: 20px; bottom: 16px; font-size: 10px; }
+    .cluster-label { font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Geistliche Prinzipien im Matthäusevangelium</h1>
+  <p class="subtitle">Wandeln-Fokus-Edition · 44 Kern-Prinzipien in 11 Clustern</p>
+</header>
+<button id="reset">Reset</button>
+<svg></svg>
+<div class="tooltip" id="tooltip"></div>
+<div class="legend">
+  Ziehe Knoten · Scrollen zoomt · Hover auf einem Prinzipien-Punkt zeigt den Vers · Hover auf einem Cluster hebt alle zugehörigen Prinzipien hervor
+</div>
+<script>
+const data = {
+  nodes: [
+    { id: "c1",  label: "Saat & Ernte",        type: "cluster", color: "#E8B923", size: 46 },
+    { id: "c2",  label: "Vergebung",           type: "cluster", color: "#5FA8D3", size: 46 },
+    { id: "c3",  label: "Demut ↔ Erhöhung",    type: "cluster", color: "#8B5FBF", size: 46 },
+    { id: "c4",  label: "Glaube bewegt Berge", type: "cluster", color: "#C94C4C", size: 46 },
+    { id: "c5",  label: "Dienen = Größe",      type: "cluster", color: "#4A9D7C", size: 46 },
+    { id: "c6",  label: "Reich zuerst",        type: "cluster", color: "#D4A017", size: 46 },
+    { id: "c7",  label: "Richtet nicht",       type: "cluster", color: "#6E8B3D", size: 46 },
+    { id: "c8",  label: "Schatz & Herz",       type: "cluster", color: "#B87333", size: 46 },
+    { id: "c9",  label: "Paradox des Lebens",  type: "cluster", color: "#3A506B", size: 46 },
+    { id: "c10", label: "Frucht & Wesen",      type: "cluster", color: "#7D9D3A", size: 46 },
+    { id: "c11", label: "Bekennen",            type: "cluster", color: "#B8336A", size: 46 },
+
+    { id: "p_5_7",   label: "Mt 5,7",   title: "Barmherzige erfahren Barmherzigkeit", type: "principle", cluster: "c1",  text: "Glückselig die Barmherzigen, denn ihnen wird Barmherzigkeit widerfahren." },
+    { id: "p_6_14",  label: "Mt 6,14",  title: "Vergeben wird, wer vergibt",          type: "principle", cluster: "c2",  text: "Denn wenn ihr den Menschen ihre Vergehungen vergebet, so wird euer himmlischer Vater auch euch vergeben." },
+    { id: "p_6_15",  label: "Mt 6,15",  title: "Nicht vergeben = nicht vergeben werden", type: "principle", cluster: "c2",  text: "Wenn ihr aber den Menschen ihre Vergehungen nicht vergebet, so wird euer Vater auch eure Vergehungen nicht vergeben." },
+    { id: "p_7_2",   label: "Mt 7,2",   title: "Mit welchem Maß ihr messet",          type: "principle", cluster: "c7",  text: "Denn mit welchem Gericht ihr richtet, werdet ihr gerichtet werden, und mit welchem Maße ihr messet, wird euch gemessen werden." },
+    { id: "p_7_8",   label: "Mt 7,8",   title: "Jeder Bittende empfängt",             type: "principle", cluster: "c4",  text: "Denn jeder Bittende empfängt, und der Suchende findet, und dem Anklopfenden wird aufgetan werden." },
+    { id: "p_7_12",  label: "Mt 7,12",  title: "Goldene Regel",                       type: "principle", cluster: "c1",  text: "Alles nun, was ihr wollt, daß euch die Menschen tun sollen, das tut auch ihr ihnen also." },
+    { id: "p_7_16",  label: "Mt 7,16",  title: "An ihren Früchten erkennen",          type: "principle", cluster: "c10", text: "An ihren Früchten werdet ihr sie erkennen." },
+    { id: "p_7_17",  label: "Mt 7,17",  title: "Guter Baum, gute Frucht",             type: "principle", cluster: "c10", text: "Jeder gute Baum bringt gute Früchte, aber der faule Baum bringt schlechte Früchte." },
+    { id: "p_7_21",  label: "Mt 7,21",  title: "Wer den Willen tut",                  type: "principle", cluster: "c10", text: "Nicht jeder, der zu mir sagt: Herr, Herr! wird in das Reich der Himmel eingehen, sondern wer den Willen meines Vaters tut, der in den Himmeln ist." },
+    { id: "p_7_25",  label: "Mt 7,25",  title: "Haus auf dem Felsen",                 type: "principle", cluster: "c10", text: "Und es fiel nicht, denn es war auf den Felsen gegründet." },
+    { id: "p_6_21",  label: "Mt 6,21",  title: "Wo dein Schatz ist",                  type: "principle", cluster: "c8",  text: "Denn wo dein Schatz ist, da wird auch dein Herz sein." },
+    { id: "p_6_24",  label: "Mt 6,24",  title: "Zwei Herren",                         type: "principle", cluster: "c8",  text: "Niemand kann zwei Herren dienen; denn entweder wird er den einen hassen und den anderen lieben, oder er wird dem einen anhangen und den anderen verachten. Ihr könnt nicht Gott dienen und dem Mammon." },
+    { id: "p_6_33",  label: "Mt 6,33",  title: "Trachtet zuerst",                     type: "principle", cluster: "c6",  text: "Trachtet aber zuerst nach dem Reiche Gottes und nach seiner Gerechtigkeit, und dies alles wird euch hinzugefügt werden." },
+    { id: "p_9_29",  label: "Mt 9,29",  title: "Nach eurem Glauben",                  type: "principle", cluster: "c4",  text: "Euch geschehe nach eurem Glauben." },
+    { id: "p_10_22", label: "Mt 10,22", title: "Wer ausharrt",                        type: "principle", cluster: "c9",  text: "Wer aber ausharrt bis ans Ende, dieser wird errettet werden." },
+    { id: "p_10_32", label: "Mt 10,32", title: "Wer mich bekennt",                    type: "principle", cluster: "c11", text: "Jeder nun, der mich vor den Menschen bekennen wird, den werde auch ich bekennen vor meinem Vater, der in den Himmeln ist." },
+    { id: "p_10_39", label: "Mt 10,39", title: "Leben finden/verlieren",              type: "principle", cluster: "c9",  text: "Wer sein Leben findet, wird es verlieren, und wer sein Leben verliert um meinetwillen, wird es finden." },
+    { id: "p_11_30", label: "Mt 11,30", title: "Mein Joch ist sanft",                 type: "principle", cluster: "c5",  text: "Denn mein Joch ist sanft, und meine Last ist leicht." },
+    { id: "p_12_25", label: "Mt 12,25", title: "Reich gegen sich selbst",             type: "principle", cluster: "c10", text: "Jedes Reich, das wider sich selbst entzweit ist, wird verwüstet; und jede Stadt oder jedes Haus, das wider sich selbst entzweit ist, wird nicht bestehen." },
+    { id: "p_12_33", label: "Mt 12,33", title: "Am Baum erkennt man die Frucht",      type: "principle", cluster: "c10", text: "Denn an der Frucht wird der Baum erkannt." },
+    { id: "p_12_34", label: "Mt 12,34", title: "Fülle des Herzens",                   type: "principle", cluster: "c10", text: "Denn aus der Fülle des Herzens redet der Mund." },
+    { id: "p_12_37", label: "Mt 12,37", title: "Aus deinen Worten",                   type: "principle", cluster: "c1",  text: "Denn aus deinen Worten wirst du gerechtfertigt werden, und aus deinen Worten wirst du verdammt werden." },
+    { id: "p_13_12", label: "Mt 13,12", title: "Wer hat, dem wird gegeben",           type: "principle", cluster: "c1",  text: "Denn wer da hat, dem wird gegeben werden, und er wird Überfluß haben." },
+    { id: "p_13_23", label: "Mt 13,23", title: "Die gute Erde bringt Frucht",         type: "principle", cluster: "c10", text: "Der aber auf die gute Erde gesät ist, dieser ist es, der das Wort hört und versteht, welcher denn Frucht bringt; und der eine trägt hundert-, der andere sechzig-, der andere dreißigfach." },
+    { id: "p_15_11", label: "Mt 15,11", title: "Was aus dem Mund kommt",              type: "principle", cluster: "c10", text: "Nicht was in den Mund eingeht, verunreinigt den Menschen, sondern was aus dem Mund ausgeht, das verunreinigt den Menschen." },
+    { id: "p_15_18", label: "Mt 15,18", title: "Aus dem Herzen hervor",               type: "principle", cluster: "c10", text: "Was aus dem Munde ausgeht, kommt aus dem Herzen hervor, und das verunreinigt den Menschen." },
+    { id: "p_16_17", label: "Mt 16,17", title: "Offenbarung vom Vater",               type: "principle", cluster: "c4",  text: "Fleisch und Blut hat dir das nicht geoffenbart, sondern mein Vater, der in den Himmeln ist." },
+    { id: "p_16_24", label: "Mt 16,24", title: "Kreuz aufnehmen",                     type: "principle", cluster: "c9",  text: "Wenn jemand mir nachkommen will, verleugne er sich selbst und nehme sein Kreuz auf und folge mir nach." },
+    { id: "p_16_25", label: "Mt 16,25", title: "Leben erretten/verlieren",            type: "principle", cluster: "c9",  text: "Denn wer irgend sein Leben erretten will, wird es verlieren; wer aber irgend sein Leben verliert um meinetwillen, wird es finden." },
+    { id: "p_16_26", label: "Mt 16,26", title: "Welt gewinnen, Seele verlieren",      type: "principle", cluster: "c9",  text: "Denn was wird es einem Menschen nützen, wenn er die ganze Welt gewönne, aber seine Seele einbüßte?" },
+    { id: "p_17_20", label: "Mt 17,20", title: "Glaube wie ein Senfkorn",             type: "principle", cluster: "c4",  text: "Wenn ihr Glauben habt wie ein Senfkorn, so werdet ihr zu diesem Berge sagen: Rücke von hier dorthin! und er wird abrücken; und nichts wird euch unmöglich sein." },
+    { id: "p_18_3",  label: "Mt 18,3",  title: "Werden wie die Kindlein",             type: "principle", cluster: "c3",  text: "Wenn ihr nicht umkehret und werdet wie die Kindlein, so werdet ihr nicht in das Reich der Himmel eingehen." },
+    { id: "p_18_19", label: "Mt 18,19", title: "Zwei kommen überein",                 type: "principle", cluster: "c4",  text: "Wenn zwei von euch auf der Erde übereinkommen werden über irgendeine Sache, welche sie auch erbitten mögen, so wird sie ihnen zuteil werden." },
+    { id: "p_18_22", label: "Mt 18,22", title: "Siebzigmal siebenmal",                type: "principle", cluster: "c2",  text: "Ich sage dir: Nicht bis siebenmal, sondern bis siebzigmal siebenmal." },
+    { id: "p_18_35", label: "Mt 18,35", title: "Von Herzen vergeben",                 type: "principle", cluster: "c2",  text: "Also wird auch mein himmlischer Vater euch tun, wenn ihr nicht ein jeder seinem Bruder von Herzen vergebet." },
+    { id: "p_20_16", label: "Mt 20,16", title: "Erste werden Letzte",                 type: "principle", cluster: "c3",  text: "Also werden die Letzten Erste und die Ersten Letzte sein." },
+    { id: "p_20_26", label: "Mt 20,26", title: "Wer groß werden will, diene",         type: "principle", cluster: "c5",  text: "Wer irgend unter euch groß werden will, soll euer Diener sein." },
+    { id: "p_21_22", label: "Mt 21,22", title: "Glaubend erbitten",                   type: "principle", cluster: "c4",  text: "Und alles, was irgend ihr im Gebet erbittet, glaubend, werdet ihr empfangen." },
+    { id: "p_22_14", label: "Mt 22,14", title: "Berufene und Auserwählte",            type: "principle", cluster: "c6",  text: "Denn viele sind Berufene, wenige aber Auserwählte." },
+    { id: "p_23_11", label: "Mt 23,11", title: "Der Größte als Diener",               type: "principle", cluster: "c5",  text: "Der Größte aber unter euch soll euer Diener sein." },
+    { id: "p_23_12", label: "Mt 23,12", title: "Sich erhöhen ↔ erniedrigen",          type: "principle", cluster: "c3",  text: "Denn wer irgend sich selbst erhöhen wird, wird erniedrigt werden; und wer irgend sich selbst erniedrigen wird, wird erhöht werden." },
+    { id: "p_24_13", label: "Mt 24,13", title: "Ausharren bis ans Ende",              type: "principle", cluster: "c9",  text: "Wer aber ausharrt bis ans Ende, dieser wird errettet werden." },
+    { id: "p_25_29", label: "Mt 25,29", title: "Wer hat, dem wird gegeben",           type: "principle", cluster: "c1",  text: "Denn jedem, der hat, wird gegeben und Überfluß gewährt werden." },
+    { id: "p_25_40", label: "Mt 25,40", title: "Den Geringsten getan",                type: "principle", cluster: "c5",  text: "Insofern ihr es einem der geringsten dieser meiner Brüder getan habt, habt ihr es mir getan." }
+  ],
+  edges: [
+    { source: "c1",  target: "c2",  weight: 0.9,  label: "Vergeben sät Vergebung" },
+    { source: "c1",  target: "c7",  weight: 0.9,  label: "Maß = Ernte" },
+    { source: "c1",  target: "c10", weight: 0.8,  label: "Frucht ist Ernte" },
+    { source: "c2",  target: "c7",  weight: 0.85, label: "Nicht richten = vergeben" },
+    { source: "c3",  target: "c5",  weight: 0.95, label: "Dienen = sich erniedrigen" },
+    { source: "c3",  target: "c9",  weight: 0.8,  label: "Sich verlieren = sich erniedrigen" },
+    { source: "c4",  target: "c6",  weight: 0.7,  label: "Glaube trachtet nach dem Reich" },
+    { source: "c4",  target: "c9",  weight: 0.75, label: "Glaube riskiert das Leben" },
+    { source: "c5",  target: "c6",  weight: 0.7,  label: "Dienst im Reich" },
+    { source: "c6",  target: "c8",  weight: 0.95, label: "Reich statt Mammon" },
+    { source: "c8",  target: "c9",  weight: 0.85, label: "Schatz loslassen = Leben verlieren" },
+    { source: "c9",  target: "c11", weight: 0.7,  label: "Bekennen kostet Leben" },
+    { source: "c10", target: "c1",  weight: 0.9,  label: "Frucht = was man erntet" },
+    { source: "c10", target: "c4",  weight: 0.6,  label: "Glaube zeigt sich in Frucht" },
+    { source: "c2",  target: "c3",  weight: 0.6,  label: "Vergeben braucht Demut" },
+    { source: "c5",  target: "c11", weight: 0.5,  label: "Dienen = bekennen durch Tat" }
+  ]
+};
+
+const svg = d3.select("svg");
+const tooltip = document.getElementById("tooltip");
+let width = window.innerWidth, height = window.innerHeight;
+
+const zoomG = svg.append("g");
+const zoom = d3.zoom()
+  .scaleExtent([0.35, 3])
+  .on("zoom", (event) => zoomG.attr("transform", event.transform));
+svg.call(zoom);
+
+const clusterNodes = data.nodes.filter(n => n.type === "cluster");
+const principleNodes = data.nodes.filter(n => n.type === "principle");
+
+const clusterLinks = data.edges.map(e => ({ source: e.source, target: e.target, weight: e.weight, label: e.label, kind: "cluster" }));
+const membershipLinks = principleNodes.map(p => ({ source: p.cluster, target: p.id, weight: 1, kind: "membership" }));
+const allLinks = [...clusterLinks, ...membershipLinks];
+
+function lighten(hex, amt) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const nr = Math.round(r + (255 - r) * amt);
+  const ng = Math.round(g + (255 - g) * amt);
+  const nb = Math.round(b + (255 - b) * amt);
+  return "rgb(" + nr + "," + ng + "," + nb + ")";
+}
+const clusterById = new Map(clusterNodes.map(c => [c.id, c]));
+principleNodes.forEach(p => {
+  const c = clusterById.get(p.cluster);
+  p.color = lighten(c.color, 0.28);
+});
+
+const simulation = d3.forceSimulation(data.nodes)
+  .force("link", d3.forceLink(allLinks).id(d => d.id)
+    .strength(d => d.kind === "cluster" ? 0.06 : 0.9)
+    .distance(d => d.kind === "cluster" ? 170 : 78))
+  .force("charge", d3.forceManyBody()
+    .strength(d => d.type === "cluster" ? -1200 : -110))
+  .force("center", d3.forceCenter(width / 2, height / 2))
+  .force("collide", d3.forceCollide().radius(d => d.type === "cluster" ? d.size + 14 : 16))
+  .alphaDecay(0.025);
+
+const edgeSel = zoomG.append("g")
+  .attr("class", "edges")
+  .selectAll("line")
+  .data(clusterLinks)
+  .join("line")
+  .attr("stroke", "#f5f1e8")
+  .attr("stroke-opacity", d => 0.12 + d.weight * 0.22)
+  .attr("stroke-width", d => 0.6 + d.weight * 2.6)
+  .attr("stroke-linecap", "round");
+
+const principleSel = zoomG.append("g")
+  .attr("class", "principles")
+  .selectAll("circle")
+  .data(principleNodes)
+  .join("circle")
+  .attr("r", 11)
+  .attr("fill", d => d.color)
+  .attr("stroke", "#1a1a2e")
+  .attr("stroke-width", 1.8)
+  .style("cursor", "pointer")
+  .call(makeDrag(simulation));
+
+const clusterSel = zoomG.append("g")
+  .attr("class", "clusters")
+  .selectAll("circle")
+  .data(clusterNodes)
+  .join("circle")
+  .attr("r", d => d.size)
+  .attr("fill", d => d.color)
+  .attr("stroke", "#f5f1e8")
+  .attr("stroke-width", 1.2)
+  .attr("fill-opacity", 0.85)
+  .style("cursor", "grab")
+  .call(makeDrag(simulation));
+
+const labelSel = zoomG.append("g")
+  .attr("class", "labels")
+  .selectAll("text")
+  .data(clusterNodes)
+  .join("text")
+  .attr("class", "cluster-label")
+  .text(d => d.label);
+
+function fitGraph(animated) {
+  const pad = 100;
+  const xs = data.nodes.map(n => n.x);
+  const ys = data.nodes.map(n => n.y);
+  const minX = Math.min.apply(null, xs);
+  const maxX = Math.max.apply(null, xs);
+  const minY = Math.min.apply(null, ys);
+  const maxY = Math.max.apply(null, ys);
+  const dx = (maxX - minX) + 120;
+  const dy = (maxY - minY) + 160;
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  const scale = Math.min((width - pad * 2) / dx, (height - pad * 2) / dy, 1.3);
+  const tx = width / 2 - scale * cx;
+  const ty = height / 2 - scale * cy;
+  const target = d3.zoomIdentity.translate(tx, ty).scale(scale);
+  if (animated) {
+    svg.transition().duration(900).ease(d3.easeCubicInOut).call(zoom.transform, target);
+  } else {
+    svg.call(zoom.transform, target);
+  }
+}
+
+function updatePositions() {
+  edgeSel
+    .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+  principleSel.attr("cx", d => d.x).attr("cy", d => d.y);
+  clusterSel.attr("cx", d => d.x).attr("cy", d => d.y);
+  labelSel.attr("x", d => d.x).attr("y", d => d.y + d.size + 20);
+}
+
+simulation.stop();
+for (let i = 0; i < 400; i++) simulation.tick();
+updatePositions();
+simulation.on("tick", updatePositions);
+fitGraph(false);
+
+function makeDrag(sim) {
+  return d3.drag()
+    .on("start", (event, d) => {
+      if (!event.active) sim.alphaTarget(0.25).restart();
+      d.fx = d.x; d.fy = d.y;
+    })
+    .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
+    .on("end", (event, d) => {
+      if (!event.active) sim.alphaTarget(0);
+      d.fx = null; d.fy = null;
+    });
+}
+
+function showTip(html, x, y) {
+  tooltip.innerHTML = html;
+  tooltip.style.left = Math.min(x + 16, window.innerWidth - 360) + "px";
+  tooltip.style.top = Math.min(y + 16, window.innerHeight - 120) + "px";
+  tooltip.style.opacity = 1;
+}
+function hideTip() { tooltip.style.opacity = 0; }
+
+principleSel
+  .on("mouseenter", function (event, d) {
+    d3.select(this).transition().duration(140).attr("r", 16);
+    const c = clusterById.get(d.cluster);
+    showTip(
+      '<span class="ref" style="color:' + lighten(c.color, 0.4) + '">' + d.label + ' — ' + d.title + '</span>' +
+      '<span class="text">„' + d.text + '"</span>',
+      event.clientX, event.clientY
+    );
+  })
+  .on("mousemove", (event) => {
+    tooltip.style.left = Math.min(event.clientX + 16, window.innerWidth - 360) + "px";
+    tooltip.style.top = Math.min(event.clientY + 16, window.innerHeight - 120) + "px";
+  })
+  .on("mouseleave", function () {
+    d3.select(this).transition().duration(140).attr("r", 11);
+    hideTip();
+  });
+
+clusterSel
+  .on("mouseenter", function (event, d) {
+    principleSel.transition().duration(180)
+      .attr("opacity", p => p.cluster === d.id ? 1 : 0.12)
+      .attr("r", p => p.cluster === d.id ? 13 : 9);
+    clusterSel.transition().duration(180).attr("fill-opacity", c => c.id === d.id ? 1 : 0.25);
+    labelSel.transition().duration(180).attr("opacity", c => c.id === d.id ? 1 : 0.3);
+    edgeSel.transition().duration(180).attr("stroke-opacity", e =>
+      (e.source.id === d.id || e.target.id === d.id) ? 0.55 : 0.04);
+    const count = principleNodes.filter(p => p.cluster === d.id).length;
+    showTip(
+      '<span class="ref" style="color:' + lighten(d.color, 0.4) + '">' + d.label + '</span>' +
+      '<span class="text">' + count + ' Prinzipien</span>',
+      event.clientX, event.clientY
+    );
+  })
+  .on("mousemove", (event) => {
+    tooltip.style.left = Math.min(event.clientX + 16, window.innerWidth - 360) + "px";
+    tooltip.style.top = Math.min(event.clientY + 16, window.innerHeight - 120) + "px";
+  })
+  .on("mouseleave", function () {
+    principleSel.transition().duration(180).attr("opacity", 1).attr("r", 11);
+    clusterSel.transition().duration(180).attr("fill-opacity", 0.85);
+    labelSel.transition().duration(180).attr("opacity", 1);
+    edgeSel.transition().duration(180).attr("stroke-opacity", e => 0.12 + e.weight * 0.22);
+    hideTip();
+  });
+
+document.getElementById("reset").addEventListener("click", () => {
+  data.nodes.forEach(n => { n.fx = null; n.fy = null; });
+  simulation.stop();
+  simulation.alpha(1);
+  for (let i = 0; i < 400; i++) simulation.tick();
+  updatePositions();
+  fitGraph(true);
+});
+
+window.addEventListener("resize", () => {
+  width = window.innerWidth; height = window.innerHeight;
+  simulation.force("center", d3.forceCenter(width / 2, height / 2));
+  fitGraph(true);
+});
+</script>
+</body>
+</html>
