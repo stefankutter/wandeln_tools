@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wandeln · Biologische Vitalitäts-Kurve</title>
+<style>
+:root{--navy:#0A1520;--navy2:#0F1923;--navy3:#1A2E3A;--navy4:#243545;
+--gold:#C99400;--gold2:#E8B830;--teal:#1D7A6B;--teal2:#4DB8A8;
+--linen:#F0EAD6;--muted:#8A7A5A;--dim:#5A6A7A;--red:#C04030;--red2:#E85040;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,serif;background:var(--navy);color:var(--linen);min-height:100vh;padding:20px 16px 40px;display:flex;flex-direction:column;align-items:center;}
+.brand{font-size:10px;letter-spacing:5px;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:4px;}
+h1{font-size:20px;font-weight:normal;text-align:center;color:var(--linen);letter-spacing:1px;margin-bottom:3px;}
+.sub{font-size:11px;color:var(--muted);font-style:italic;text-align:center;letter-spacing:1px;margin-bottom:16px;}
+.filters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;}
+.flt{background:none;border:1px solid var(--navy4);color:var(--dim);font-family:Georgia,serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;cursor:pointer;transition:all .2s;}
+.flt.active{border-color:var(--gold);color:var(--gold);}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:center;margin-bottom:14px;}
+.leg{display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:1px;color:var(--muted);}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.chart-wrap{width:100%;max-width:980px;background:var(--navy2);border:1px solid var(--navy4);border-radius:14px;padding:16px 12px 8px;margin-bottom:12px;overflow:hidden;cursor:grab;}
+.chart-wrap.dragging{cursor:grabbing;}
+svg#chart{display:block;width:100%;}
+.info-panel{width:100%;max-width:980px;background:var(--navy2);border:1px solid var(--navy4);border-radius:12px;padding:16px 20px;min-height:82px;border-left:3px solid var(--dim);transition:border-color .3s;margin-bottom:12px;}
+.info-name{font-size:15px;color:var(--linen);margin-bottom:2px;letter-spacing:1px;}
+.info-meta{font-size:11px;color:var(--gold);letter-spacing:2px;margin-bottom:6px;}
+.info-desc{font-size:13px;color:var(--muted);line-height:1.85;font-style:italic;}
+.axes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:980px;margin-bottom:10px;}
+.axes-box{background:var(--navy2);border:1px solid var(--navy4);border-radius:10px;padding:12px 14px;}
+.axes-lbl{font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:5px;}
+.axes-txt{font-size:11px;color:var(--muted);line-height:1.85;}
+.verse{font-size:11px;color:var(--muted);text-align:center;font-style:italic;margin-top:6px;line-height:2;}
+.node{cursor:pointer;}.node.faded{opacity:.1;}
+</style>
+</head>
+<body>
+<div class="brand">Wandeln</div>
+<h1>Biologische Vitalitäts-Kurve</h1>
+<div class="sub">23 Metalle + 6 Nicht-Metalle · Vitalitäts-Index · gestrichelt = Nicht-Metall · Pan &amp; Zoom aktiv</div>
+
+<div class="filters" id="filters">
+  <button class="flt active" data-cat="all">Alle</button>
+  <button class="flt" data-cat="redoxer">Redoxer</button>
+  <button class="flt" data-cat="helfer">Helfer</button>
+  <button class="flt" data-cat="leiter">Edle Leiter</button>
+  <button class="flt" data-cat="toxisch">Toxisch</button>
+  <button class="flt" data-cat="nonmetal">Nicht-Metalle</button>
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#4DB8A8"></div>Redoxer</div>
+  <div class="leg"><div class="leg-dot" style="background:#C99400"></div>Helfer &amp; Nicht-Metall (essentiell)</div>
+  <div class="leg"><div class="leg-dot" style="background:#E0C870"></div>Edle Leiter</div>
+  <div class="leg"><div class="leg-dot" style="background:#E85040"></div>Toxisch (Metall &amp; Nicht-Metall)</div>
+</div>
+
+<div class="chart-wrap" id="chartWrap">
+<svg id="chart" viewBox="0 0 960 520" xmlns="http://www.w3.org/2000/svg">
+<g id="zoomable" transform="translate(0,0) scale(1)">
+  <!-- grid -->
+  <line x1="50" y1="20"  x2="920" y2="20"  stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <line x1="50" y1="130" x2="920" y2="130" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="4,6"/>
+  <line x1="50" y1="240" x2="920" y2="240" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="4,6"/>
+  <line x1="50" y1="350" x2="920" y2="350" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="4,6"/>
+  <line x1="50" y1="460" x2="920" y2="460" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <!-- Y axis -->
+  <line x1="50" y1="12" x2="50" y2="460" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <polygon points="46,18 50,6 54,18" fill="rgba(255,255,255,0.1)"/>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="end" x="46" y="23">100</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="end" x="46" y="133">75</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="end" x="46" y="243">50</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="end" x="46" y="353">25</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="end" x="46" y="463">0</text>
+  <!-- X axis labels -->
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="50"  y="478">−3.5V</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="183" y="478">−2.5V</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="315" y="478">−1.5V</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="448" y="478">−0.5V</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="514" y="478">0V</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="580" y="478">+0.5V</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="712" y="478">+1.5V</text>
+  <text font-size="9" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="844" y="478">+2.5V</text>
+  <text font-size="8" fill="#5A6A7A" font-family="Georgia,serif" text-anchor="middle" x="490" y="497">← reduzierend · Elektrochemisches Potential (Volt) · oxidierend →</text>
+  <!-- Zero line -->
+  <line x1="514" y1="12" x2="514" y2="460" stroke="rgba(255,255,255,0.07)" stroke-width="1" stroke-dasharray="3,5"/>
+  <!-- Totes Tal band -->
+  <rect x="50" y="393" width="870" height="67" fill="rgba(192,64,48,0.07)" rx="2"/>
+  <text font-size="8" fill="rgba(220,80,60,0.4)" font-family="Georgia,serif" text-anchor="end" x="918" y="464" letter-spacing="2">TOTES TAL · Vitalität 0–15</text>
+  <!-- nodes -->
+  <g id="nodes"></g>
+</g>
+</svg>
+</div>
+
+<div class="info-panel" id="infoPanel">
+  <div style="font-size:13px;color:var(--dim);font-style:italic">Klicke auf ein Element — oder filtere oben nach Kategorie.</div>
+</div>
+
+<div class="axes-grid">
+  <div class="axes-box">
+    <div class="axes-lbl">Vitalitäts-Index (Y-Achse)</div>
+    <div class="axes-txt">Y = (10 · E₀²) + B<sub>Flexibilität</sub> − P<sub>Toxizität</sub><br>
+    Rohe elektrische Kraft + Bonus für Enzym-Flexibilität (Lewis-Säure, Redox-Wechsel, Hormon-Funktion) − Strafe für HSAB-Irreversibilität (Schwefel-Verschweißung, Enzym-Blockade).<br>
+    Nicht-Metalle (gestrichelt): gleiche Formel mit Detox/Hormon-Bonus.</div>
+  </div>
+  <div class="axes-box">
+    <div class="axes-lbl">Halogenen-Duell (rechts)</div>
+    <div class="axes-txt">Jod (+0.54V, Vitalität 65) ist das einzige essenzielle Halogen. Brom, Chlor und Fluor verdrängen es aus denselben Rezeptoren — obwohl sie selbst keine Hormone bauen. Je weiter rechts, desto aggressiver der Verdränger. Fluor (+2.87V) hat die höchste rohe Power — aber Vitalität = 4 durch MAX-Strafe.</div>
+  </div>
+</div>
+
+<div class="verse">„Was auch immer wahr ist, was auch immer rein ist — darüber denkt nach." · Phil 4,8</div>
+
+<script>
+var elements = [
+  {de:"Lithium",    sym:"Li", volt:-3.04, vit:100, cat:"redoxer",  metal:true,  lx:0,   ly:-20, la:"middle",
+   desc:"Neuro-Kühlmittel & ATP-Verstärker. Stimuliert Astrozyten Glutamat aufzusaugen. Stärkster natürlicher Stimmungsstabilisator. Vitalität fast ausschließlich aus roher elektrischer Power (92.4) + kleinem Neuro-Bonus."},
+  {de:"Rubidium",   sym:"Rb", volt:-2.98, vit:96,  cat:"redoxer",  metal:true,  lx:13,  ly:4,   la:"start",
+   desc:"Hochspannungs-Zünder. Strukturell ähnlich wie Kalium. Unterstützt zelluläre Spannkraft und neuronale Reizleitung. Raw-Power dominiert."},
+  {de:"Kalium",     sym:"K",  volt:-2.93, vit:93,  cat:"redoxer",  metal:true,  lx:13,  ly:14,  la:"start",
+   desc:"Primärer Impulsgeber der Nervenleitung. Ohne Kalium bricht die elektrische Ladung der Zellmembran zusammen. Wird durch chronischen Stress schnell verbraucht."},
+  {de:"Calcium",    sym:"Ca", volt:-2.87, vit:89,  cat:"redoxer",  metal:true,  lx:0,   ly:22,  la:"middle",
+   desc:"Master-Schalter für Muskeln und Synapsen. Reguliert den Informationsfluss zwischen Neuronen. Muss mit K2 und Magnesium im Gleichgewicht bleiben."},
+  {de:"Natrium",    sym:"Na", volt:-2.71, vit:80,  cat:"redoxer",  metal:true,  lx:13,  ly:4,   la:"start",
+   desc:"Hält die Spannung an der Außenseite der Zellmembran — die Basis für das elektrische Feuern der Neuronen. Osmotisches Gleichgewicht."},
+  {de:"Magnesium",  sym:"Mg", volt:-2.37, vit:85,  cat:"redoxer",  metal:true,  lx:-13, ly:-14, la:"end",
+   desc:"Zündschlüssel. Bindet ATP und ermöglicht erst die Energieverwendung. Enzym-Bonus +29 hebt ihn über seine rohe Power (56.2) hinaus. Ohne Magnesium kein GABA, kein Tiefschlaf."},
+  {de:"Aluminium",  sym:"Al", volt:-1.66, vit:10,  cat:"toxisch",  metal:true,  lx:0,   ly:22,  la:"middle",
+   desc:"Energiedieb. Zu hohe Ladungsdichte (Z/r) — greift in Mg-Bindestellen irreversibel ein. HSAB: harte Säure. Führt zu ATP-Produktionsausfall. Strafe −18 dominiert."},
+  {de:"Schwefel",   sym:"S",  volt:-0.48, vit:88,  cat:"helfer",   metal:false, lx:-13, ly:-14, la:"end",
+   desc:"Detox-Champion (Nicht-Metall). Als Glutathion-Vorläufer via Cystein/Methionin die wichtigste körpereigene Entgiftungssubstanz. Thiolgruppe (−SH) bindet Hg, Pb, As direkt. MAX Bonus +86. Trotz mittlerer Spannung: Vitalität 88."},
+  {de:"Mangan",     sym:"Mn", volt:-1.18, vit:65,  cat:"helfer",   metal:true,  lx:-13, ly:-14, la:"end",
+   desc:"Stimmungsmineral & Katalysator. Essenziell für Glutamin-Synthetase — wandelt Glutamat in neutrales Glutamin um. Kühlt Ammoniak-Überhitzung im Gehirn. Enzym-Bonus +51."},
+  {de:"Vanadium",   sym:"V",  volt:-1.13, vit:60,  cat:"helfer",   metal:true,  lx:13,  ly:4,   la:"start",
+   desc:"Insulin-Mimese. Ahmt die Wirkung von Insulin nach und verbessert die Blutzuckerregulation. Essenziell in Spuren — erhöhte Mengen toxisch. Bonus +47."},
+  {de:"Zink",       sym:"Zn", volt:-0.76, vit:75,  cat:"helfer",   metal:true,  lx:-13, ly:-14, la:"end",
+   desc:"Meister der Lewis-Säure-Katalyse. Greift Wassermoleküle und spaltet sie präzise — enzymatische Schere. GABA-Schalter, Blut-Hirn-Schranke. Bonus +69 — weit über raw-Power (5.8)."},
+  {de:"Chrom",      sym:"Cr", volt:-0.74, vit:55,  cat:"helfer",   metal:true,  lx:13,  ly:14,  la:"start",
+   desc:"Insulin-Sensibilisator. Potenziert den Insulin-Rezeptor. Defizit bei Zucker-Sucht und Stimmungsschwankungen. Bonus +50."},
+  {de:"Eisen",      sym:"Fe", volt:-0.44, vit:85,  cat:"helfer",   metal:true,  lx:0,   ly:-20, la:"middle",
+   desc:"Zellatmungs-Champion. Wechselt blitzschnell zwischen Fe²⁺ und Fe³⁺ — maximale Flexibilität. MAX Bonus +83. Größte Lücke zwischen raw-Power (1.9) und Vitalität (85) im gesamten Chart."},
+  {de:"Cadmium",    sym:"Cd", volt:-0.40, vit:5,   cat:"toxisch",  metal:true,  lx:-13, ly:4,   la:"end",
+   desc:"Hochgiftiger Zink-Verdränger. Weiche Säure (HSAB) — verschweißt Schwefelgruppen in Enzymen irreversibel. Zigarettenrauch ist Hauptquelle. Raw nahe 0, Vitalität = 5."},
+  {de:"Cobalt",     sym:"Co", volt:-0.28, vit:70,  cat:"helfer",   metal:true,  lx:0,   ly:-20, la:"middle",
+   desc:"Vitamin-B12-Cofaktor. Ohne Cobalt kein Methylcobalamin — kein Myelin-Schutz für Nervenfasern. Essenziell für Energiestoffwechsel und Zellteilung. B12-Bonus +69."},
+  {de:"Nickel",     sym:"Ni", volt:-0.25, vit:15,  cat:"toxisch",  metal:true,  lx:13,  ly:4,   la:"start",
+   desc:"Grenzgänger. In Spuren cofaktorisch, in erhöhten Mengen stark allergisierend. Verdrängt Zink und Magnesium. HSAB-Störung. Strafe −15."},
+  {de:"Phosphor",   sym:"P",  volt:-0.06, vit:72,  cat:"helfer",   metal:false, lx:13,  ly:4,   la:"start",
+   desc:"Strukturelement (Nicht-Metall). Rückgrat von ATP, DNA, RNA und Zellmembranen. Kein Redox-Akteur — aber ohne Phosphor kein Energiespeicher. Raw≈0, Vitalität 72 fast ausschließlich Struktur-Bonus."},
+  {de:"Molybdän",   sym:"Mo", volt:-0.20, vit:50,  cat:"helfer",   metal:true,  lx:0,   ly:22,  la:"middle",
+   desc:"Sulfit-Entgifter. Aktiviert Sulfit-Oxidase — neutralisiert Sulfite aus Wein und Trockenfrüchten. Entgiftungs-Bonus +50. Liegt nah am Nullpunkt."},
+  {de:"Blei",       sym:"Pb", volt:-0.13, vit:0,   cat:"toxisch",  metal:true,  lx:0,   ly:22,  la:"middle",
+   desc:"Die tote Batterie. Weiche Säure — verschweißt flexible Schwefel-Scharniere in Enzymen starr (HSAB). Neurotoxizität durch Pumpen-Stillstand. Vitalität = 0. Raw≈0, Strafe dominiert alles."},
+  {de:"Arsen",      sym:"As", volt:+0.24, vit:2,   cat:"toxisch",  metal:true,  lx:13,  ly:4,   la:"start",
+   desc:"ATP-Zerstörer. Verhindert Energiespeicherung in Zellen. HSAB-Strafe. Akkumuliert in Haaren und Nägeln. Reisanbau ist eine unterschätzte Quelle. Vitalität = 2."},
+  {de:"Jod",        sym:"I",  volt:+0.54, vit:65,  cat:"helfer",   metal:false, lx:0,   ly:-20, la:"middle",
+   desc:"Einziges essentielles Halogen (Nicht-Metall). Baustein der Schilddrüsenhormone T3 und T4. Hormon-Bonus +62. Problem: Brom, Chlor und Fluor verdrängen Jod aus denselben Rezeptoren obwohl sie selbst keine Hormone bauen."},
+  {de:"Kupfer",     sym:"Cu", volt:+0.34, vit:65,  cat:"leiter",   metal:true,  lx:-13, ly:-14, la:"end",
+   desc:"Edler Leiter. Unverzichtbar für Energieproduktion in Mitochondrien (Cytochrom-C). Vernetzt Bindegewebe und Gefäße. Gleichgewicht mit Zink entscheidend. Leitungs-Bonus +64."},
+  {de:"Silber",     sym:"Ag", volt:+0.80, vit:50,  cat:"leiter",   metal:true,  lx:-13, ly:-14, la:"end",
+   desc:"Starker elektrischer Leiter. Natürlich antimikrobiell. Unterstützt zelluläre Kommunikation. In kolloidaler Form diskutiert. Leitungs-Bonus +44."},
+  {de:"Brom",       sym:"Br", volt:+1.07, vit:12,  cat:"toxisch",  metal:false, lx:0,   ly:22,  la:"middle",
+   desc:"Kein bekannter essentieller Bedarf (Nicht-Metall). Verdrängt Jod aus Schilddrüsenrezeptoren. Quellen: Bromiertes Backmehl, Flammschutzmittel in Möbeln/Elektronik. Akkumuliert im Fettgewebe."},
+  {de:"Quecksilber",sym:"Hg", volt:+0.85, vit:5,   cat:"toxisch",  metal:true,  lx:13,  ly:4,   la:"start",
+   desc:"Aggressivster Saboteur — weichste Säure überhaupt (HSAB). Verschweißt Schwefel-Scharniere irreversibel. Zerstört Blut-Hirn-Schranke. Amalgam und Großfisch sind Hauptquellen. MAX Strafe."},
+  {de:"Selen",      sym:"Se", volt:+1.15, vit:85,  cat:"leiter",   metal:true,  lx:0,   ly:-20, la:"middle",
+   desc:"Der große Beschützer. Zentrum des Glutathion-Antioxidantien-Systems. Reguliert Schilddrüse. MAX Bonus +72. Trotz positiver Spannung: Vitalität 85 — fast so hoch wie Eisen und Magnesium."},
+  {de:"Chlor",      sym:"Cl", volt:+1.36, vit:18,  cat:"toxisch",  metal:false, lx:0,   ly:22,  la:"middle",
+   desc:"Als Chlorid essentiell (HCl, Elektrolyt) — als Chlorgas/Chloramin toxisch (Nicht-Metall). Verdrängt Jod aus Rezeptoren. Gechlortetes Trinkwasser als Belastungsquelle. Netto-Strafe überwiegt."},
+  {de:"Gold",       sym:"Au", volt:+1.50, vit:58,  cat:"leiter",   metal:true,  lx:13,  ly:4,   la:"start",
+   desc:"Das edle Extrem. Perfekte verlustfreie Leitfähigkeit. Anti-inflammatorische Goldverbindungen (Auranofin) medizinisch belegt. Nanomedikal aktiv. Bonus +35.5 — von Gemini auf 40 unterschätzt, korrigiert auf 58."},
+  {de:"Fluor",      sym:"F",  volt:+2.87, vit:4,   cat:"toxisch",  metal:false, lx:0,   ly:-20, la:"middle",
+   desc:"Stärkstes Oxidationsmittel der gesamten Reihe — raw Power 82.4 (Nicht-Metall). Trotzdem Vitalität = 4 durch MAX-Strafe (−78.4). Verdrängt Jod, Calcium und Magnesium aus allen Enzymbindestellen. Quellen: fluoridiertes Wasser, Zahnpasta, Fluoroquinolone."},
+];
+
+var CAT={
+  redoxer:{fill:"#4DB8A8",stroke:"#1D7A6B"},
+  helfer: {fill:"#C99400",stroke:"#8A6400"},
+  leiter: {fill:"#E0C870",stroke:"#A09040"},
+  toxisch:{fill:"#E85040",stroke:"#A03020"},
+};
+
+// X: -3.5 to +3.1 = 6.6V → 50..920 (870px)
+// Y: vit 0..100 → 460..20 (440px inverted)
+function mapX(v){return 50+((v+3.5)/6.6)*870;}
+function mapY(v){return 460-(v/100)*440;}
+
+var svgNS="http://www.w3.org/2000/svg";
+var nodesG=document.getElementById('nodes');
+var panel=document.getElementById('infoPanel');
+
+elements.forEach(function(el){
+  var cx=mapX(el.volt), cy=mapY(el.vit);
+  var r=el.cat==='toxisch'?14:13;
+  var col=CAT[el.cat];
+
+  var g=document.createElementNS(svgNS,'g');
+  g.setAttribute('class','node');
+  g.setAttribute('data-cat',el.cat);
+  g.setAttribute('data-metal',el.metal?'1':'0');
+  g.setAttribute('data-cx',cx);
+  g.setAttribute('data-cy',cy);
+
+  var gl=document.createElementNS(svgNS,'circle');
+  gl.setAttribute('cx',cx);gl.setAttribute('cy',cy);
+  gl.setAttribute('r',r+10);gl.setAttribute('fill',col.fill);gl.setAttribute('opacity','0.13');
+
+  var c=document.createElementNS(svgNS,'circle');
+  c.setAttribute('class','main');
+  c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',r);
+  c.setAttribute('fill',col.fill);c.setAttribute('stroke',col.stroke);
+  c.setAttribute('stroke-width',el.metal?'1.5':'2.5');
+  if(!el.metal) c.setAttribute('stroke-dasharray','5 3');
+
+  var sym=document.createElementNS(svgNS,'text');
+  sym.setAttribute('x',cx);sym.setAttribute('y',cy+4);
+  sym.setAttribute('text-anchor','middle');
+  sym.setAttribute('font-size',el.sym.length>2?'8':'10');
+  sym.setAttribute('font-family','Georgia,serif');
+  sym.setAttribute('font-weight','bold');
+  sym.setAttribute('fill','#0A1520');
+  sym.setAttribute('pointer-events','none');
+  sym.textContent=el.sym;
+
+  var lbl=document.createElementNS(svgNS,'text');
+  lbl.setAttribute('x',cx+el.lx);lbl.setAttribute('y',cy+el.ly);
+  lbl.setAttribute('text-anchor',el.la);
+  lbl.setAttribute('font-size','10');
+  lbl.setAttribute('font-family','Georgia,serif');
+  lbl.setAttribute('font-weight','bold');
+  lbl.setAttribute('fill','#C0B898');
+  lbl.setAttribute('pointer-events','none');
+  lbl.textContent=el.de;
+
+  [gl,c,sym,lbl].forEach(function(n){g.appendChild(n);});
+
+  function show(){
+    panel.style.borderColor=col.fill;
+    panel.innerHTML=
+      '<div class="info-name">'+el.de+' <span style="font-size:12px;color:var(--dim)">('+el.sym+')</span>'+
+      (!el.metal?' <span style="font-size:9px;color:var(--dim);letter-spacing:2px;border:1px solid var(--dim);border-radius:8px;padding:1px 6px">NICHT-METALL</span>':'')+
+      '</div>'+
+      '<div class="info-meta">'+(el.volt>0?'+':'')+el.volt.toFixed(2)+' V · Vitalität: '+el.vit+'/100 · '+
+      el.cat.charAt(0).toUpperCase()+el.cat.slice(1)+'</div>'+
+      '<div class="info-desc">'+el.desc+'</div>';
+  }
+  g.addEventListener('mouseenter',show);
+  g.addEventListener('click',show);
+  nodesG.appendChild(g);
+});
+
+// Filter
+document.getElementById('filters').addEventListener('click',function(e){
+  var btn=e.target.closest('.flt');
+  if(!btn) return;
+  var cat=btn.dataset.cat;
+  document.querySelectorAll('.flt').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.querySelectorAll('.node').forEach(function(n){
+    var show=cat==='all'||n.dataset.cat===cat||(cat==='nonmetal'&&n.dataset.metal==='0');
+    n.classList.toggle('faded',!show);
+  });
+});
+
+// Pan & Zoom
+var applyTransform;
+(function(){
+  var svg=document.querySelector('svg#chart');
+  var g=document.getElementById('zoomable');
+  var wrap=document.getElementById('chartWrap');
+  var scale=1,tx=0,ty=0,isDrag=false,startX=0,startY=0,startTx=0,startTy=0,lastDist=null;
+  var MIN=0.3,MAX=5;
+
+  applyTransform=function(){
+    g.setAttribute('transform','translate('+tx+','+ty+') scale('+scale+')');
+    var ns=(1+(scale-1)*0.25)/scale;
+    document.querySelectorAll('.node').forEach(function(n){
+      var cx=parseFloat(n.getAttribute('data-cx'));
+      var cy=parseFloat(n.getAttribute('data-cy'));
+      if(!isNaN(cx)) n.setAttribute('transform','translate('+cx+','+cy+') scale('+ns+') translate('+(-cx)+','+(-cy)+')');
+    });
+  };
+
+  svg.addEventListener('wheel',function(e){
+    e.preventDefault();
+    var r=svg.getBoundingClientRect();
+    var mx=(e.clientX-r.left)*(960/r.width);
+    var my=(e.clientY-r.top)*(520/r.height);
+    var d=e.deltaY<0?1.12:0.89;
+    var ns=Math.max(MIN,Math.min(MAX,scale*d));
+    tx=mx-(mx-tx)*(ns/scale);ty=my-(my-ty)*(ns/scale);scale=ns;applyTransform();
+  },{passive:false});
+
+  svg.addEventListener('mousedown',function(e){isDrag=true;startX=e.clientX;startY=e.clientY;startTx=tx;startTy=ty;wrap.classList.add('dragging');});
+  window.addEventListener('mousemove',function(e){
+    if(!isDrag) return;
+    var r=svg.getBoundingClientRect();
+    tx=startTx+(e.clientX-startX)*(960/r.width);
+    ty=startTy+(e.clientY-startY)*(520/r.height);
+    applyTransform();
+  });
+  window.addEventListener('mouseup',function(){isDrag=false;wrap.classList.remove('dragging');});
+
+  svg.addEventListener('touchstart',function(e){
+    if(e.touches.length===1){isDrag=true;startX=e.touches[0].clientX;startY=e.touches[0].clientY;startTx=tx;startTy=ty;}
+    else if(e.touches.length===2) lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+  },{passive:true});
+  svg.addEventListener('touchmove',function(e){
+    e.preventDefault();
+    if(e.touches.length===1&&isDrag){var r=svg.getBoundingClientRect();tx=startTx+(e.touches[0].clientX-startX)*(960/r.width);ty=startTy+(e.touches[0].clientY-startY)*(520/r.height);applyTransform();}
+    else if(e.touches.length===2&&lastDist){var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);var ns=Math.max(MIN,Math.min(MAX,scale*(d/lastDist)));lastDist=d;scale=ns;applyTransform();}
+  },{passive:false});
+  svg.addEventListener('touchend',function(){isDrag=false;lastDist=null;});
+})();
+
+if(typeof applyTransform==='function') applyTransform();
+</script>
+</body>
+</html>
