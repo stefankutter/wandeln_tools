@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wandeln · Resonanz-Atem</title>
+<meta name="theme-color" content="#0A1520">
+
+<!-- Pre-load chime audio files for iOS-safe playback -->
+<link rel="preload" as="audio" href="wandeln_chime_in.mp3">
+<link rel="preload" as="audio" href="wandeln_chime_out.mp3">
+
 <style>
 :root {
   --navy:  #0A1520;
@@ -18,6 +24,7 @@
   --terra: #C05A2A;
   --terra2:#E87840;
   --sage:  #4A7A5A;
+  --body:  #D8CCBA;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -145,6 +152,21 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
 .info-overlay p:last-child { margin-bottom: 0; }
 .info-close { font-size: 11px; color: var(--dim); cursor: pointer; text-align: right;
   display: block; margin-top: 8px; letter-spacing: 1px; }
+
+.sound-toggle {
+  background: none;
+  border: 1px solid var(--navy3);
+  color: var(--muted);
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+.sound-toggle.on { color: var(--teal2); border-color: var(--teal); }
 
 .verse { font-size: 11px; color: var(--muted); text-align: center; font-style: italic; max-width: 260px; line-height: 1.9; margin-top: 16px; }
 .note { font-size: 11px; color: var(--dim); text-align: center; line-height: 1.8; margin-bottom: 10px; }
@@ -307,6 +329,8 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
     <button class="btn stress btn-sm" id="stressBtn" onclick="toggleStress()" style="flex:1">🆘 Anti-Stress</button>
   </div>
 
+  <button class="sound-toggle on" id="soundBtn" onclick="toggleSound()">🔊 Ton</button>
+
   <div style="display:flex;gap:8px;width:100%">
     <button class="btn teal btn-sm" onclick="goToProfile()" style="flex:1">Neu kalibrieren</button>
   </div>
@@ -326,10 +350,13 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
   <div class="verse">„Der Herr ist nahe." · Phil 4,5</div>
 </div>
 
+<!-- ── AUDIO ELEMENTS (iOS-safe MP3 chimes) ── -->
+<audio id="chimeIn" preload="auto" src="wandeln_chime_in.mp3"></audio>
+<audio id="chimeOut" preload="auto" src="wandeln_chime_out.mp3"></audio>
+
 <script>
 // ── STATE ─────────────────────────────────────────────
 var sex = 'm', height = 170;
-
 var moodOffset = 0;
 
 function setMood(offset, el) {
@@ -352,73 +379,69 @@ var breathRunning = false;
 var breathCycles = 0, breathElapsed = 0;
 var breathDurMin = 5;
 
-// Audio — defensive mobile-safe implementation
-var actx = null, gainNode = null;
-var audioReady = false;
+// ── AUDIO: iOS-safe HTMLAudioElement playback ─────────
+// Pre-loaded MP3 chimes — no Web Audio API, no oscillator allocation,
+// no memory accumulation over long sessions. Plays at phase transitions.
+var chimeIn = document.getElementById('chimeIn');
+var chimeOut = document.getElementById('chimeOut');
+var audioUnlocked = false;
 var soundEnabled = true;
 
-function initAudio() {
-  // Only init on explicit user gesture — called from button clicks
-  if (audioReady) {
-    // Resume if suspended (common on iOS after backgrounding)
-    if (actx && actx.state === 'suspended') {
-      actx.resume().catch(function(){});
-    }
-    return;
-  }
+function unlockAudio() {
+  // iOS requires audio to be touched during a user gesture before it
+  // can be played later from a timer. Silent play+pause "unlocks" both elements.
+  if (audioUnlocked) return;
+  if (!chimeIn || !chimeOut) return;
   try {
-    actx = new (window.AudioContext || window.webkitAudioContext)();
-    gainNode = actx.createGain();
-    gainNode.gain.setValueAtTime(0, actx.currentTime);
-    gainNode.connect(actx.destination);
-    audioReady = true;
+    var vIn = chimeIn.volume, vOut = chimeOut.volume;
+    chimeIn.volume = 0;
+    chimeOut.volume = 0;
+    var p1 = chimeIn.play();
+    var p2 = chimeOut.play();
+    if (p1 && p1.catch) p1.catch(function(){});
+    if (p2 && p2.catch) p2.catch(function(){});
+    setTimeout(function() {
+      try {
+        chimeIn.pause();
+        chimeOut.pause();
+        chimeIn.currentTime = 0;
+        chimeOut.currentTime = 0;
+        chimeIn.volume = vIn;
+        chimeOut.volume = vOut;
+      } catch(e) {}
+      audioUnlocked = true;
+    }, 50);
   } catch(e) {
     soundEnabled = false;
   }
 }
 
-function playTone(freq, durSec) {
-  if (!soundEnabled || !audioReady || !actx) return;
-  // Resume suspended context (iOS backgrounding fix)
-  if (actx.state === 'suspended') {
-    actx.resume().catch(function(){});
-    return;
-  }
+function playChime(direction) {
+  if (!soundEnabled) return;
+  var audio = direction === 'inhale' ? chimeIn : chimeOut;
+  if (!audio) return;
   try {
-    // Fresh oscillator each time — more reliable than reusing
-    var o = actx.createOscillator();
-    var g = actx.createGain();
-    o.type = 'sine';
-    o.frequency.setValueAtTime(freq, actx.currentTime);
-    o.connect(g);
-    g.connect(actx.destination);
-    var t = actx.currentTime;
-    var fadeIn = Math.min(0.5, durSec * 0.1);
-    var fadeOut = Math.min(0.8, durSec * 0.15);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.08, t + fadeIn);
-    g.gain.linearRampToValueAtTime(0.06, t + durSec - fadeOut);
-    g.gain.linearRampToValueAtTime(0, t + durSec - 0.05);
-    o.start(t);
-    o.stop(t + durSec);
-    // Auto-cleanup to prevent memory leak
-    o.onended = function() {
-      try { o.disconnect(); g.disconnect(); } catch(e) {}
-    };
+    audio.currentTime = 0;
+    var p = audio.play();
+    if (p && p.catch) p.catch(function(){});
   } catch(e) {}
 }
 
 function silenceTone() {
-  // No-op needed — each tone auto-stops via o.stop()
+  // Stop any currently playing chime
+  try {
+    if (chimeIn && !chimeIn.paused) { chimeIn.pause(); chimeIn.currentTime = 0; }
+    if (chimeOut && !chimeOut.paused) { chimeOut.pause(); chimeOut.currentTime = 0; }
+  } catch(e) {}
 }
 
-
-// iOS fix: resume AudioContext when page becomes visible again
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden && actx && actx.state === 'suspended') {
-    actx.resume().catch(function(){});
-  }
-});
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  var btn = document.getElementById('soundBtn');
+  btn.textContent = soundEnabled ? '🔊 Ton' : '🔇 Ton';
+  btn.classList.toggle('on', soundEnabled);
+  if (!soundEnabled) silenceTone();
+}
 
 // ── FORMULAS ─────────────────────────────────────────
 function calcRF(s, h) {
@@ -463,6 +486,7 @@ function getCalibRF(round) {
 }
 
 function startCalibration() {
+  unlockAudio();  // unlock during user gesture
   calibRound = 0;
   calibFreqs = [];
   calibFeelings = [];
@@ -483,7 +507,6 @@ function runCalibRound() {
   document.getElementById('calibRoundInfo').textContent = 'Runde ' + (calibRound+1) + ' von 3';
   document.getElementById('calibHz').textContent = rf.toFixed(1) + ' BPM · ' + ph.toFixed(1) + 's ein / ' + ph.toFixed(1) + 's aus';
 
-  initAudio();
   runCalibPhase();
 }
 
@@ -493,7 +516,7 @@ function runCalibPhase() {
   document.getElementById('calibPhase').textContent = label;
   document.getElementById('calibBall').className = 'pacer-ball ' + calibPhase;
   animateBall('calibBall', calibPhase, durSec);
-  playTone(calibPhase === 'inhale' ? 174 : 136, durSec);
+  playChime(calibPhase);
 
   calibSec = Math.round(durSec);
   document.getElementById('calibCount').textContent = calibSec;
@@ -551,6 +574,7 @@ function showResult() {
 }
 
 function skipToBreathing() {
+  unlockAudio();  // unlock during user gesture
   finalRF = calcRF(sex, height);
   startBreathing();
 }
@@ -589,7 +613,7 @@ function startBreathing() {
 
 function toggleBreath() {
   if (!breathRunning) {
-    initAudio();
+    unlockAudio();  // unlock during user gesture
     breathRunning = true;
     document.getElementById('breathBtn').textContent = 'Pause';
     bPhase = 'inhale';
@@ -622,7 +646,6 @@ function toggleStress() {
     bInSec = ph;
     bOutSec = Math.round((ph + 1) * 10) / 10;
     breathDurMin = 15;
-    // visually select 15min button
     document.querySelectorAll('.dur-btn').forEach(function(b){ b.classList.remove('active'); });
     var btns = document.querySelectorAll('.dur-btn');
     if(btns[2]) btns[2].classList.add('active');
@@ -652,7 +675,7 @@ function runBPhase() {
   document.getElementById('breathPhaseLabel').textContent = label;
   document.getElementById('breathBall').className = ballClass;
   animateBall('breathBall', bPhase, durSec);
-  playTone(bPhase === 'inhale' ? 174 : 136, durSec);
+  playChime(bPhase);
 
   bSec = Math.round(durSec);
   document.getElementById('breathCount').textContent = bSec;
