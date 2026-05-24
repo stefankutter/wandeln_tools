@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wandeln · Metamorphose beginnt im Geist</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#0A1520">
+<meta name="description" content="Wandeln — Metamorphose beginnt im Geist. Werkzeuge für Atem, Rhythmus, Nährstoffe.">
+<style>
+:root {
+  --bg:           #0A1520;
+  --bg-card:      #0F1E2A;
+  --bg-edge:      #1A2E3A;
+  --text:         #F0EAD6;
+  --text-muted:   #C5BDA5;
+  --gold:         #C99400;
+  --gold-muted:   #A89870;
+  --teal:         #1D7A6B;
+  --teal-light:   #4DB8A8;
+  --steel:        #8A95A5;
+  --steel-dim:    #6A7A8A;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 20px 50px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ──────────────────────────────────── */
+header {
+  text-align: center;
+  margin-bottom: 28px;
+  max-width: 600px;
+}
+
+.brand {
+  font-size: 16px;
+  letter-spacing: 7px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.tagline {
+  font-size: 17px;
+  color: var(--text);
+  font-style: italic;
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+
+/* ── INTRO ───────────────────────────────────── */
+.intro {
+  max-width: 540px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 36px;
+  line-height: 1.85;
+  padding: 0 8px;
+}
+
+/* ── TOOL GROUPS ─────────────────────────────── */
+main {
+  width: 100%;
+  max-width: 900px;
+}
+
+.group {
+  margin-bottom: 32px;
+}
+
+.group-title {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--bg-edge);
+}
+
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.tile {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-edge);
+  border-radius: 12px;
+  padding: 20px 22px;
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.tile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--teal);
+  transform: scaleX(0);
+  transition: transform 0.3s;
+  transform-origin: left;
+}
+
+.tile:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+.tile:hover::before {
+  transform: scaleX(1);
+  background: var(--gold);
+}
+
+.tile-icon {
+  font-size: 28px;
+  color: var(--teal-light);
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.tile-name {
+  font-size: 15px;
+  color: var(--gold);
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.tile-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  flex: 1;
+}
+
+.tile-tag {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--steel);
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dotted var(--bg-edge);
+  text-transform: uppercase;
+}
+
+.tile.external .tile-icon { color: var(--gold-muted); }
+
+/* ── TELEGRAM CTA ────────────────────────────── */
+.telegram-cta {
+  width: 100%;
+  max-width: 600px;
+  margin: 16px auto 0;
+  padding: 28px 26px;
+  background: var(--bg-card);
+  border: 1px solid var(--teal);
+  border-radius: 14px;
+  text-align: center;
+}
+.cta-icon {
+  font-size: 22px;
+  color: var(--teal-light);
+  margin-bottom: 8px;
+}
+.cta-headline {
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.cta-text {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.85;
+  margin-bottom: 20px;
+}
+.cta-text strong { color: var(--text); }
+.cta-btn {
+  display: inline-block;
+  background: none;
+  border: 1.5px solid var(--gold);
+  color: var(--gold);
+  padding: 11px 32px;
+  border-radius: 24px;
+  text-decoration: none;
+  font-size: 11.5px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  font-family: Georgia, serif;
+  transition: all 0.3s;
+}
+.cta-btn:hover {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+/* ── FOOTER ──────────────────────────────────── */
+footer {
+  width: 100%;
+  max-width: 560px;
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--bg-edge);
+}
+
+.footer-verse {
+  font-size: 11px;
+  color: var(--gold-muted);
+  font-style: italic;
+  line-height: 1.9;
+  max-width: 480px;
+  margin: 0 auto 16px;
+}
+
+.footer-privacy {
+  font-size: 10px;
+  color: var(--steel-dim);
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Wandeln</div>
+  <div class="tagline">Metamorphose beginnt im Geist</div>
+</header>
+
+<p class="intro">
+  Werkzeuge für die innere Wandlung — Atem, Rhythmus, Nährstoffe.
+  Alles läuft lokal in deinem Browser. Kein Tracking, keine Cookies, keine Datenübertragung.
+</p>
+
+<main>
+
+  <section class="group">
+    <div class="group-title">Atem &amp; Stille</div>
+    <div class="tile-grid">
+
+      <a href="wandeln_resonanz_atem.html" class="tile">
+        <div class="tile-icon">∿</div>
+        <div class="tile-name">Resonanz-Atem</div>
+        <div class="tile-desc">Kohärenz-Atmung in zwei Modi — direkt im 5–5-Rhythmus loslegen oder kalibrieren auf deine individuelle Herzfrequenz-Resonanz. Klangzeichen für Ein- und Ausatmung, Anti-Stress-Modus mit verlängertem Ausatmen.</div>
+        <div class="tile-tag">Empfohlen · Kalibriert · Standard 5–5</div>
+      </a>
+
+      <a href="wandeln_atem_timer.html" class="tile">
+        <div class="tile-icon">⌽</div>
+        <div class="tile-name">4-7-8 Atem</div>
+        <div class="tile-desc">Andrew Weils Schlaf- und Übergangs-Methode. Für akute Entspannung, Einschlafen, Cortisol-Abbau nach belastenden Momenten.</div>
+        <div class="tile-tag">Schlaf · Übergänge</div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-title">Tagesrhythmus</div>
+    <div class="tile-grid">
+
+      <a href="wandeln_planer.html" class="tile">
+        <div class="tile-icon">◔</div>
+        <div class="tile-name">Protokoll-Planer</div>
+        <div class="tile-desc">Tagesstruktur, Stimmungs-Tracking und Wochen-Übersicht. Checklisten für Morgen-/Abend-Routine, Bewegung, Fasten-Tage. CSV-Export. Lokal gespeichert.</div>
+        <div class="tile-tag">Tracking · Checklisten · Mood</div>
+      </a>
+
+      <a href="wandeln_erinnerungen.html" class="tile">
+        <div class="tile-icon">⏰</div>
+        <div class="tile-name">Tagesplaner &amp; Erinnerungen</div>
+        <div class="tile-desc">Audio-Anbindungen zu fest definierten Zeiten — Morgen-Ausrichtung 528 Hz, Abend-Übergabe 432 Hz, Nachtschleife. Live-Modus für Tab-Coaching oder Kalender-Export für native Erinnerungen.</div>
+        <div class="tile-tag">Audio · Live-Modus · Kalender-Export</div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-title">Nährstoffe</div>
+    <div class="tile-grid">
+
+      <a href="wandeln_supplement_rechner.html" class="tile">
+        <div class="tile-icon">⚗</div>
+        <div class="tile-name">Supplement-Rechner</div>
+        <div class="tile-desc">Personalisierte Dosis-Empfehlungen nach Geschlecht, Alter, Gewicht und Lebenssituation. Neun Schlüssel-Supplemente mit funktionalmedizinischen Richtwerten.</div>
+        <div class="tile-tag">Personalisiert</div>
+      </a>
+
+      <a href="NEM-Liste.html" class="tile">
+        <div class="tile-icon">◇</div>
+        <div class="tile-name">NEM-Liste</div>
+        <div class="tile-desc">Wachsende Liste bioverfügbarer Nahrungsergänzungen aus dem DACH-Raum — ohne Magnesiumstearate, Nanopartikel oder problematische Füllstoffe. Mit Preis-Leistungs-Vergleich.</div>
+        <div class="tile-tag">Produkte · Marken</div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-title">Protokolle</div>
+    <div class="tile-grid">
+
+      <a href="sk_geistig_neuro_Regenerationsprotokoll.pdf" class="tile external" target="_blank" rel="noopener">
+        <div class="tile-icon">⊛</div>
+        <div class="tile-name">Geistig-Emotionales Regenerationsprotokoll</div>
+        <div class="tile-desc">Praxis-Anleitung zur Wiederherstellung innerer Ruhe und seelischer Klarheit. Vagus-Nerv-Pflege, GABA-Glutamat-Balance, Wege aus chronischer Übererregung — durch Atem, Mineralien und gezielte Übungen.</div>
+        <div class="tile-tag">Praxisprotokoll · PDF</div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-title">Studienbibel</div>
+    <div class="tile-grid">
+
+      <a href="matthaeus_studienbibel_26_seiten.pdf" class="tile external" target="_blank" rel="noopener">
+        <div class="tile-icon">▤</div>
+        <div class="tile-name">Matthäus-Evangelium</div>
+        <div class="tile-desc">Studienbibel zum Matthäus-Evangelium mit Auslegungen, geschichtlichem Hintergrund und Querverweisen.</div>
+        <div class="tile-tag">26 Seiten · PDF</div>
+      </a>
+
+      <a href="markus_studienbibel_18_seiten.pdf" class="tile external" target="_blank" rel="noopener">
+        <div class="tile-icon">▤</div>
+        <div class="tile-name">Markus-Evangelium</div>
+        <div class="tile-desc">Studienbibel zum Markus-Evangelium mit Auslegungen, geschichtlichem Hintergrund und Querverweisen.</div>
+        <div class="tile-tag">18 Seiten · PDF</div>
+      </a>
+
+    </div>
+  </section>
+
+</main>
+
+<section class="telegram-cta">
+  <div class="cta-icon">✦</div>
+  <div class="cta-headline">Wandeln · Gemeinschaft</div>
+  <div class="cta-text">
+    Im Telegram-Kanal sind <strong>alle Audios direkt abspielbar</strong> — Morgen-Ausrichtung 528 Hz, Abend-Übergabe 432 Hz, Nachtschleife, Heiliger Geist Bibelstellen — plus neue Praxis-Impulse, Hintergrund-Lesestoff und der Austausch in der Wandeln-Gemeinschaft.
+  </div>
+  <a href="https://t.me/wandeln_geist" class="cta-btn" target="_blank" rel="noopener">Beitreten →</a>
+</section>
+
+<footer>
+  <div class="footer-verse">
+    »Werdet nicht dieser Welt gleich, sondern wandelt euch durch Erneuerung eures Sinnes, damit ihr prüfen könnt, was Gottes Wille ist, das Gute und Wohlgefällige und Vollkommene.«<br>
+    — Röm 12,2
+  </div>
+  <div class="footer-privacy">🔒 Lokal · Kein Tracking · Kein Server</div>
+</footer>
+
+</body>
+</html>
