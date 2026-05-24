@@ -7,8 +7,8 @@
 <meta name="theme-color" content="#0A1520">
 
 <!-- Pre-load chime audio files for iOS-safe playback -->
-<link rel="preload" as="audio" href="wandeln_chime_in.mp3">
-<link rel="preload" as="audio" href="wandeln_chime_out.mp3">
+<link rel="preload" as="audio" href="wandeln_chime_in.wav">
+<link rel="preload" as="audio" href="wandeln_chime_out.wav">
 
 <style>
 :root {
@@ -350,9 +350,9 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px;
   <div class="verse">„Der Herr ist nahe." · Phil 4,5</div>
 </div>
 
-<!-- ── AUDIO ELEMENTS (iOS-safe MP3 chimes) ── -->
-<audio id="chimeIn" preload="auto" src="wandeln_chime_in.mp3"></audio>
-<audio id="chimeOut" preload="auto" src="wandeln_chime_out.mp3"></audio>
+<!-- ── AUDIO ELEMENTS (lossless WAV — no encoder artifacts) ── -->
+<audio id="chimeIn" preload="auto" src="wandeln_chime_in.wav"></audio>
+<audio id="chimeOut" preload="auto" src="wandeln_chime_out.wav"></audio>
 
 <script>
 // ── STATE ─────────────────────────────────────────────
@@ -388,29 +388,32 @@ var audioUnlocked = false;
 var soundEnabled = true;
 
 function unlockAudio() {
-  // iOS requires audio to be touched during a user gesture before it
-  // can be played later from a timer. Silent play+pause "unlocks" both elements.
+  // iOS requires play() to be called during a user gesture for each <audio>
+  // element before it can be played programmatically later (from a timer).
+  // We call play() then immediately pause() to satisfy this without
+  // leaving the audio in a "playing" state — that previously caused Edge
+  // to lose the first chime when setTimeout paused mid-playback.
   if (audioUnlocked) return;
   if (!chimeIn || !chimeOut) return;
+  audioUnlocked = true;  // set first to prevent re-entry races
   try {
     var vIn = chimeIn.volume, vOut = chimeOut.volume;
     chimeIn.volume = 0;
     chimeOut.volume = 0;
+
+    // Unlock chimeIn — synchronous play+pause, catch the AbortError
     var p1 = chimeIn.play();
-    var p2 = chimeOut.play();
     if (p1 && p1.catch) p1.catch(function(){});
+    chimeIn.pause();
+    chimeIn.currentTime = 0;
+    chimeIn.volume = vIn;
+
+    // Unlock chimeOut — same pattern
+    var p2 = chimeOut.play();
     if (p2 && p2.catch) p2.catch(function(){});
-    setTimeout(function() {
-      try {
-        chimeIn.pause();
-        chimeOut.pause();
-        chimeIn.currentTime = 0;
-        chimeOut.currentTime = 0;
-        chimeIn.volume = vIn;
-        chimeOut.volume = vOut;
-      } catch(e) {}
-      audioUnlocked = true;
-    }, 50);
+    chimeOut.pause();
+    chimeOut.currentTime = 0;
+    chimeOut.volume = vOut;
   } catch(e) {
     soundEnabled = false;
   }
@@ -423,7 +426,17 @@ function playChime(direction) {
   try {
     audio.currentTime = 0;
     var p = audio.play();
-    if (p && p.catch) p.catch(function(){});
+    if (p && p.catch) p.catch(function(){
+      // Retry once after a brief delay — handles edge cases where the
+      // first play() fails because audio is still buffering on cold start.
+      setTimeout(function() {
+        try {
+          audio.currentTime = 0;
+          var p2 = audio.play();
+          if (p2 && p2.catch) p2.catch(function(){});
+        } catch(e2) {}
+      }, 30);
+    });
   } catch(e) {}
 }
 
