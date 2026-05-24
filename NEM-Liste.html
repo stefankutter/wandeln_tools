@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wandeln · NEM-Liste</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#0A1520">
+<meta name="description" content="Wachsende Liste bioverfügbarer Nahrungsergänzungen ohne problematische Füllstoffe — Recherche aus dem DACH-Raum.">
+<style>
+:root {
+  --bg:           #0A1520;
+  --bg-card:      #0F1E2A;
+  --bg-edge:      #1A2E3A;
+  --text:         #F0EAD6;
+  --text-muted:   #C5BDA5;
+  --gold:         #C99400;
+  --gold-muted:   #A89870;
+  --teal:         #1D7A6B;
+  --teal-light:   #4DB8A8;
+  --terra:        #C04040;
+  --terra-light:  #E08080;
+  --steel:        #8A95A5;
+  --steel-dim:    #6A7A8A;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 20px 60px;
+  overflow-y: auto;
+}
+
+/* ── HEADER ──────────────────────────────────── */
+.brand {
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--gold);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 11px;
+  color: var(--gold-muted);
+  font-style: italic;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 24px;
+  max-width: 480px;
+}
+
+/* ── BACK LINK ───────────────────────────────── */
+.back-link {
+  display: inline-block;
+  color: var(--teal-light);
+  font-size: 11.5px;
+  letter-spacing: 1.5px;
+  text-decoration: none;
+  margin-bottom: 20px;
+  border-bottom: 1px dotted var(--teal);
+  padding: 3px 0;
+  transition: all 0.2s;
+}
+.back-link:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* ── INTRO ───────────────────────────────────── */
+.intro {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-edge);
+  border-radius: 12px;
+  padding: 20px 22px;
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 16px;
+}
+.intro p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+.intro p:last-child { margin-bottom: 0; }
+.intro strong { color: var(--text); }
+
+.criteria-list {
+  list-style: none;
+  margin: 10px 0;
+  padding-left: 0;
+}
+.criteria-list li {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.85;
+  padding-left: 22px;
+  position: relative;
+}
+.criteria-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--teal-light);
+  font-weight: bold;
+}
+
+/* ── TABLE OF CONTENTS ───────────────────────── */
+.toc {
+  background: rgba(29, 122, 107, 0.08);
+  border: 1px solid var(--teal);
+  border-radius: 10px;
+  padding: 16px 18px;
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 28px;
+}
+.toc-title {
+  font-size: 10.5px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.toc-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.toc-list a {
+  font-size: 11.5px;
+  color: var(--teal-light);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+.toc-list a:hover { color: var(--gold); }
+.toc-list a::after { content: " ·"; color: var(--steel-dim); margin-left: 8px; }
+.toc-list li:last-child a::after { content: ""; }
+
+/* ── SECTION ─────────────────────────────────── */
+.supp-section {
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 28px;
+  scroll-margin-top: 20px;
+}
+
+.section-header {
+  border-bottom: 1px solid var(--bg-edge);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+.section-name {
+  font-size: 18px;
+  color: var(--gold);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.section-role {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* ── PRODUCT CARD ────────────────────────────── */
+.product {
+  background: var(--bg-card);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.product.premium { border-left-color: var(--gold); }
+.product.budget  { border-left-color: var(--steel); }
+
+.product-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.product-brand {
+  font-size: 12.5px;
+  color: var(--text);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+.product-price {
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.product-name {
+  font-size: 12px;
+  color: var(--teal-light);
+  margin-bottom: 4px;
+  font-style: italic;
+}
+.product-spec {
+  font-size: 11px;
+  color: var(--steel);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.product-why {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.product-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  color: var(--teal-light);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--teal);
+  padding: 2px 0;
+}
+.product-link:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* ── NOTE BOX ────────────────────────────────── */
+.note-box {
+  background: rgba(201, 148, 0, 0.07);
+  border-left: 2px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 14px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.75;
+}
+.note-box strong { color: var(--gold); }
+
+.alert-box {
+  background: rgba(192, 64, 64, 0.08);
+  border-left: 2px solid var(--terra);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 14px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--terra-light);
+  line-height: 1.75;
+}
+.alert-box strong { color: var(--terra-light); }
+
+/* ── FOOTER ──────────────────────────────────── */
+.disclaimer {
+  font-size: 10.5px;
+  color: var(--steel-dim);
+  text-align: center;
+  line-height: 1.85;
+  margin-top: 20px;
+  max-width: 480px;
+  font-style: italic;
+}
+
+.footer-link-row {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.footer-link-row a {
+  color: var(--steel);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--steel-dim);
+}
+.footer-link-row a:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+</style>
+</head>
+<body>
+
+<div class="brand">Wandeln</div>
+<div class="subtitle">NEM-Liste · Bioverfügbare Nahrungsergänzungen ohne problematische Füllstoffe</div>
+
+<a href="wandeln_supplement_rechner.html" class="back-link">← zurück zum Rechner</a>
+
+<div class="intro">
+  <p><strong>Eine wachsende Liste empfehlenswerter Produkte aus dem DACH-Raum.</strong></p>
+  <p>Pro Supplement sind 2–3 Produkte aufgeführt, die folgende Kriterien erfüllen:</p>
+  <ul class="criteria-list">
+    <li>Keine Magnesiumstearate, Titandioxid, Nanopartikel oder PEG/Carrageen</li>
+    <li>Bioverfügbare Formen (R-Form bei Liponsäure, MK-7 all-trans bei K2, Triglyceride bei Omega-3, aktivierte Formen bei B-Vitaminen)</li>
+    <li>Premium-Formen nur dort empfohlen, wo nachweislich überlegene Wirksamkeit den Mehrpreis rechtfertigt</li>
+  </ul>
+  <p>Diese Liste basiert auf Recherche und Herstellerangaben, ergänzt durch unabhängige Tests (Kölner Liste, IFOS, Stiftung Warentest) und Erfahrungsberichte. <strong>Keine persönliche Garantie</strong> — Wirkung kann individuell variieren. Bei Erkrankungen oder Medikamenteneinnahme bitte mit Arzt oder Heilpraktiker abstimmen.</p>
+</div>
+
+<div class="toc">
+  <div class="toc-title">Übersicht</div>
+  <ul class="toc-list">
+    <li><a href="#magnesium">Magnesium</a></li>
+    <li><a href="#omega-3">Omega-3</a></li>
+    <li><a href="#vitamin-d3-k2">Vitamin D3+K2</a></li>
+    <li><a href="#l-carnitin">L-Carnitin</a></li>
+    <li><a href="#r-alpha-liponsaeure">R-Alpha-Liponsäure</a></li>
+    <li><a href="#l-theanin">L-Theanin</a></li>
+    <li><a href="#taurin">Taurin</a></li>
+    <li><a href="#glycin">Glycin</a></li>
+    <li><a href="#nac">NAC</a></li>
+    <li><a href="#b-komplex">B-Komplex</a></li>
+    <li><a href="#zink">Zink</a></li>
+    <li><a href="#selen">Selen</a></li>
+    <li><a href="#bor">Bor</a></li>
+    <li><a href="#lithium-orotat">Lithium-Orotat</a></li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SECTIONS
+     ═══════════════════════════════════════════════════════════════ -->
+
+<section class="supp-section" id="magnesium">
+  <div class="section-header">
+    <div class="section-name">Magnesium · Bisglycinat</div>
+    <div class="section-role">Empfohlene Tagesdosis: 200–300 mg elementares Magnesium, abends. Bisglycinat ist die bestverträgliche und bioverfügbarste Form (kein Durchfall, hirngängig durch Glycin-Bindung).</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~24 €</div>
+    </div>
+    <div class="product-name">Magnesium Glycinat pure 750 mg</div>
+    <div class="product-spec">120 Kapseln · 75 mg Mg pro Kapsel · 60 Tage Reichweite bei 2/Tag</div>
+    <div class="product-why">Reines Bisglycinat ohne Oxid-Anteil, ideal für empfindliche Verdauung. Deklariert ohne Stearate, Nanopartikel oder Titandioxid.</div>
+    <a class="product-link" href="https://www.sunday.de/magnesium-glycinat-pur-kapseln.html" target="_blank" rel="noopener">sunday.de ↗</a>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~35 €</div>
+    </div>
+    <div class="product-name">Magnesium Glycinat Depot 150 mg</div>
+    <div class="product-spec">240 Kapseln · 150 mg Mg pro Kapsel · 120 Tage Reichweite</div>
+    <div class="product-why">Höhere Wirkstoffdichte (20% Mg-Gehalt) bei gleichem Reinheitsstandard. Bestes Preis-Leistungs-Verhältnis bei längerer Einnahme.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">natural elements</div>
+      <div class="product-price">~20 €</div>
+    </div>
+    <div class="product-name">Magnesium Bisglycinat 300 mg</div>
+    <div class="product-spec">180 Kapseln · 300 mg Mg pro Tagesdosis (2 Kapseln) · 90 Tage</div>
+    <div class="product-why">Vegan, Akazienfaser statt mikrokristalliner Cellulose, in DE laborgeprüft. Günstige Alternative.</div>
+  </div>
+
+  <div class="note-box">
+    <strong>Komplex-Format:</strong> Wer mehrere Mg-Formen kombinieren möchte (Bisglycinat plus Citrat, Malat, Taurat) → Sunday Natural "Magnesium Komplex 11 Formen" — Hauptanteil bleibt Bisglycinat, Taurat ergänzt sinnvoll (siehe auch Taurin).
+  </div>
+</section>
+
+<section class="supp-section" id="omega-3">
+  <div class="section-header">
+    <div class="section-name">Omega-3 · EPA + DHA</div>
+    <div class="section-role">Empfohlene Tagesdosis: 2 g EPA+DHA. <strong>Triglycerid-Form</strong> ist 50–300% besser aufgenommen als die billige Ethylester-Konzentrat-Form. Ethylester braucht zusätzliche enzymatische Spaltung im Darm und kommt nur unvollständig im Blut an.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">NORSAN</div>
+      <div class="product-price">~35 € / Flasche</div>
+    </div>
+    <div class="product-name">Omega-3 Total Öl (Fischöl)</div>
+    <div class="product-spec">200 ml · 1 EL (8 ml) = 2000 mg EPA+DHA · ca. 25 Tage Reichweite</div>
+    <div class="product-why">Vollspektrum-Wildfisch in nativer Triglycerid-Form. EPA-dominant (1.9:1 EPA:DHA), Totox-Wert ~10 (sehr frisch). Geprüft durch IFOS, GOED, Kölner Liste. Mit Bio-Olivenöl als Oxidationsschutz.</div>
+    <a class="product-link" href="https://www.norsan.de" target="_blank" rel="noopener">norsan.de ↗</a>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~30 €</div>
+    </div>
+    <div class="product-name">Omega-3 Algenöl 40% EPA + 22.5% DHA (vegan)</div>
+    <div class="product-spec">60 Softgels · 400 mg EPA + 225 mg DHA pro Kapsel · 3/Tag = 1.9 g</div>
+    <div class="product-why">Aus Mikroalge Schizochytrium sp., Triglycerid-Form. EPA-dominant (16:9), gut für stress-/entzündungs-fokussierte Profile. Ohne PEG, ohne Carrageen, keine Schwermetalle.</div>
+    <a class="product-link" href="https://www.sunday.de/omega-3-epa-dha-kapseln.html" target="_blank" rel="noopener">sunday.de ↗</a>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~28 €</div>
+    </div>
+    <div class="product-name">Omega-3 Algenöl flüssig (DHA-reich, 2:1)</div>
+    <div class="product-spec">100 ml · 3 Pipetten = 400 mg DHA + 200 mg EPA · Glasflasche</div>
+    <div class="product-why">DHA-dominantes Profil — vorzuziehen bei Schwangerschaft, Stillzeit, Neurodevelopment. Mit Rosmarinextrakt und natürlichen Tocopherolen als Oxidationsschutz.</div>
+  </div>
+
+  <div class="alert-box">
+    <strong>Was zu vermeiden ist:</strong> Drogerie-Marken-Fischöl ist häufig hochkonzentrierter Ethylester (chemische Veresterung). Etikett checken: muss "Triglyceride" oder "Triglycerid-Form" explizit sagen, sonst ist es Ethylester.
+  </div>
+</section>
+
+<section class="supp-section" id="vitamin-d3-k2">
+  <div class="section-header">
+    <div class="section-name">Vitamin D3 + K2 (MK-7 all-trans)</div>
+    <div class="section-role">Empfohlene Tagesdosis: 2000–5000 IE D3 + 100–200 µg K2 als MK-7 all-trans, mit Fett. K2 lenkt das durch D3 verfügbare Kalzium in Knochen statt Arterien — niemals isoliertes D3.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~24 €</div>
+    </div>
+    <div class="product-name">Vitamin D3+K2 MK-7 5000 IE / 200 µg Tropfen</div>
+    <div class="product-spec">300 Tropfen · 1/Tag · ca. 10 Monate Reichweite</div>
+    <div class="product-why">K2VITAL® von Kappa Norwegen — ≥99.7% all-trans MK-7 (Labor-bestätigt). D3 als Sunferol®-Marke aus Lanolin. In MCT-Öl aus Kokos, ohne versteckte Zusätze.</div>
+    <a class="product-link" href="https://www.sunday.de/vitamin-d3-5000-plus-k2-mk7-200mcg-100-prozent-all-trans.html" target="_blank" rel="noopener">sunday.de ↗</a>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~28 €</div>
+    </div>
+    <div class="product-name">Vitamin D3+K2 vegan 5000 IE / 200 µg</div>
+    <div class="product-spec">300 Tropfen · vegane Variante</div>
+    <div class="product-why">D3 aus Pinienöl statt Lanolin — vegan-tauglich. Mit Sunquinone® K2 (Eigenmarke, ca. 99.8% all-trans). Etwas teurer als vegetarische Standard-Variante.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~18 €</div>
+    </div>
+    <div class="product-name">Vitamin D3+K2 1000 IE / 50 µg</div>
+    <div class="product-spec">300 Tropfen · 1/Tag · niedrigdosierte Erhaltungsform</div>
+    <div class="product-why">Für Kinder, Schwangere oder als sanfte Erhaltungsdosis. Gleiche Premium-Wirkstoffe in geringerer Konzentration.</div>
+  </div>
+
+  <div class="alert-box">
+    <strong>Die "all-trans"-Falle:</strong> Im K2-Markt gibt es viel Etikettenschwindel — "MK-7" allein heißt nicht "all-trans". Nur die trans-Form ist im Körper wirksam, cis-Isomere sind biologisch tot. Auf "≥99% all-trans" achten. Sunday Naturals K2VITAL® und Sunquinone® garantieren das laborbestätigt; viele Discount-Marken nicht.
+  </div>
+</section>
+
+<section class="supp-section" id="l-carnitin">
+  <div class="section-header">
+    <div class="section-name">L-Carnitin / Acetyl-L-Carnitin (ALCAR)</div>
+    <div class="section-role">Empfohlene Tagesdosis: 500–1000 mg ALCAR morgens nüchtern (neuro-Effekt), oder 1000–2000 mg L-Carnitin-Tartrat (Sport). <strong>ALCAR überquert die Blut-Hirn-Schranke</strong>, normales Carnitin nicht — für Neuro/CPTSD/Müdigkeit ist die acetylierte Form Pflicht.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~28 €</div>
+    </div>
+    <div class="product-name">Acetyl-L-Carnitin Kapseln</div>
+    <div class="product-spec">120 Kapseln · 500 mg ALCAR · ca. 4 Monate Reichweite</div>
+    <div class="product-why">Reines ALCAR ohne Füllstoffe. HPMC-Kapseln ohne Carrageen/PEG. Standard-Wahl für tägliche Einnahme.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~24 €</div>
+    </div>
+    <div class="product-name">Acetyl-L-Carnitin Pulver 100 g</div>
+    <div class="product-spec">1 Messlöffel = 500 mg · flexibel dosierbar</div>
+    <div class="product-why">Für individuelle Dosierung (z.B. höhere Dosen 1000–1500 mg). Aromaschutz-Beutel, lichtgeschützt. Pulver löst sich gut in Wasser.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">Vit4ever</div>
+      <div class="product-price">~25 €</div>
+    </div>
+    <div class="product-name">L-Carnitin 2000 (Tartrat)</div>
+    <div class="product-spec">240 Tabletten · 1000 mg L-Carnitin-Tartrat pro Tablette</div>
+    <div class="product-why">Günstigere Sport-Variante — aber <strong>kein ALCAR, daher kein Neuro-Effekt</strong>. Nur sinnvoll für reine Sport-Anwendung. Vegan, ohne Stearate.</div>
+  </div>
+</section>
+
+<section class="supp-section" id="r-alpha-liponsaeure">
+  <div class="section-header">
+    <div class="section-name">R-Alpha-Liponsäure</div>
+    <div class="section-role">Empfohlene Tagesdosis: 100–300 mg R-ALA morgens nüchtern. Universelles Antioxidans, regeneriert Glutathion, Vit C und E.</div>
+  </div>
+
+  <div class="alert-box">
+    <strong>Wichtig: niemals Razemat (DL-ALA).</strong> Das billige Razemat enthält 50% inaktive S-Form, die zusätzlich die Aufnahme der R-Form blockiert. Ein gutes R-ALA steht explizit als "R-Alpha-Liponsäure" oder besser noch als "Sodium R-Lipoate" / "Natrium-R-Lipoat" auf dem Etikett — letzteres ist die stabilisierte Form.
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~32 €</div>
+    </div>
+    <div class="product-name">R-Alpha-Liponsäure Bioaktiv Stabilisiert</div>
+    <div class="product-spec">60 Kapseln · 100 mg Bio Enhanced® Na-RALA · 60 Tage Reichweite</div>
+    <div class="product-why">Patentierte Form mit <strong>21-facher Bioverfügbarkeit</strong> gegenüber unstabilisiertem R-ALA (Cmax-Messung). Natriumsalz vollständig wasserlöslich, kein Kaliumsalz. Hier rechtfertigt der Aufpreis die Wirksamkeit eindeutig.</div>
+    <a class="product-link" href="https://www.sunday.de/r-alpha-liponsaeure-bioaktiv-vegan-hochdosiert.html" target="_blank" rel="noopener">sunday.de ↗</a>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~45 €</div>
+    </div>
+    <div class="product-name">R-Alpha-Liponsäure Liposomal flüssig</div>
+    <div class="product-spec">250 ml · 100 mg R-ALA + 650 mg Vit C pro 2 TL (10 ml)</div>
+    <div class="product-why">Echt-liposomale Form mit Sonnenblumen-Phospholipiden (kein Soja, kein PEG). Bessere Resorption durch Verschmelzung mit Zellmembranen. Doppelter Preis lohnt nur bei Magen-Empfindlichkeit oder Wunsch nach kombinierter Vit-C-Aufnahme.</div>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">VitaminExpress</div>
+      <div class="product-price">~35 €</div>
+    </div>
+    <div class="product-name">BioActive R-Alpha Liponsäure</div>
+    <div class="product-spec">60 Kapseln · 150 mg Natrium-R-Lipoat pro Kapsel</div>
+    <div class="product-why">Vergleichbare Stabilisierung (Natriumsalz), eigene Marke. Etwas höhere Wirkstoffmenge pro Kapsel.</div>
+  </div>
+</section>
+
+<section class="supp-section" id="l-theanin">
+  <div class="section-header">
+    <div class="section-name">L-Theanin</div>
+    <div class="section-role">Empfohlene Tagesdosis: 100–200 mg, je nach akutem Stress-Level oder als Schlafvorbereitung. GABA-Modulator, induziert Alpha-Wellen (entspannte Wachheit). Kombiniert mit Kaffee kappt es den Jitter.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Naturtreu</div>
+      <div class="product-price">~26 €</div>
+    </div>
+    <div class="product-name">L-Theanin 200 mg (Suntheanine®)</div>
+    <div class="product-spec">90 Kapseln · 200 mg Suntheanine® · 90 Tage Reichweite</div>
+    <div class="product-why">Suntheanine® ist die patentierte 100% reine L-Isomer-Form, klinisch in 50+ Studien dokumentiert. Gold-Standard für die Studien-belegte Wirkung.</div>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~22 €</div>
+    </div>
+    <div class="product-name">L-Theanin aus Grüntee 100 mg</div>
+    <div class="product-spec">90 Kapseln · 100 mg L-Theanin aus Grüntee-Extrakt · pestizidfrei</div>
+    <div class="product-why">Natürlicher Extrakt aus Camellia sinensis statt synthetisch fermentiert. Mit begleitenden Pflanzenstoffen. Günstiger und naturnäher; klinische Standardisierung weniger straff als Suntheanine.</div>
+    <a class="product-link" href="https://www.sunday.de/theanin/" target="_blank" rel="noopener">sunday.de ↗</a>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">NOW Foods</div>
+      <div class="product-price">~22 €</div>
+    </div>
+    <div class="product-name">L-Theanine 200 mg (mit Inositol)</div>
+    <div class="product-spec">120 Veg-Kapseln · 200 mg + 100 mg Inositol</div>
+    <div class="product-why">US-Marke, GMP-zertifiziert, ohne Stearate, über iHerb erhältlich. Inositol-Zusatz unterstützt Serotonin-Synthese — kann hilfreich oder neutral sein je nach Empfindlichkeit.</div>
+  </div>
+</section>
+
+<section class="supp-section" id="taurin">
+  <div class="section-header">
+    <div class="section-name">Taurin</div>
+    <div class="section-role">Empfohlene Tagesdosis: 1–3 g abends oder mit Mahlzeit. GABA-A-Agonist, schützt Neuronen vor Glutamat-Überreizung, baut Glutathion-Vorstufen auf.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~20 €</div>
+    </div>
+    <div class="product-name">Taurin Pulver 200 g (vegan)</div>
+    <div class="product-spec">200 g · 1 Messlöffel = 2 g · 100 Tage Reichweite</div>
+    <div class="product-why">Aus Fermentation gewonnen (vegan, keine tierischen Quellen wie Stierhoden). Reines Pulver, freie Dosierung, Aromaschutz-Beutel.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">Vit4ever</div>
+      <div class="product-price">~15 €</div>
+    </div>
+    <div class="product-name">Taurin 1000 mg Tabletten</div>
+    <div class="product-spec">365 Tabletten · 1000 mg pro Tablette · 1 Jahr Vorrat</div>
+    <div class="product-why">Sehr günstig, vegan, ohne Magnesiumstearat. Pflanzliche Cellulose als Bindemittel.</div>
+  </div>
+
+  <div class="note-box">
+    Bei Taurin ist die Form (immer reines L-Taurin) unkritisch — Hauptkriterium ist Sauberkeit ohne Füllstoffe. Pulver ist deutlich wirtschaftlicher als Kapseln bei diesen Dosismengen.
+  </div>
+</section>
+
+<section class="supp-section" id="glycin">
+  <div class="section-header">
+    <div class="section-name">Glycin</div>
+    <div class="section-role">Empfohlene Tagesdosis: 3–5 g abends in Wasser (leicht süßlich). Schlaf-Architektur-Verbesserer (Bannai 2012), Baustein der Darmwand, Glutathion-Vorstufe.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~18 €</div>
+    </div>
+    <div class="product-name">Glycin Pulver 250 g (vegan)</div>
+    <div class="product-spec">250 g · 1 Messlöffel = 3 g · ca. 80 Tage Reichweite</div>
+    <div class="product-why">Aus Fermentation (vegan), keine tierische Quelle. Löst sich gut im Abend-Tee oder warmen Wasser.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">Vit4ever</div>
+      <div class="product-price">~22 €</div>
+    </div>
+    <div class="product-name">Glycin Pulver 500 g</div>
+    <div class="product-spec">500 g · bestes Preis-Mengen-Verhältnis</div>
+    <div class="product-why">Vegan, ohne Zusätze. Doppelte Menge zum nur leicht höheren Preis — ideal für längere Anwendung oder mehrere Personen im Haushalt.</div>
+  </div>
+</section>
+
+<section class="supp-section" id="nac">
+  <div class="section-header">
+    <div class="section-name">NAC · N-Acetylcystein</div>
+    <div class="section-role">Empfohlene Tagesdosis: 600 mg morgens + 600 mg abends mit Mahlzeit. <strong>Akut-Phase 2–3 Wochen, dann pausieren oder pulsen</strong> — kein Lifestyle-Supplement. Glutathion-Vorstufe, Glutamat-Modulator.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~38 €</div>
+    </div>
+    <div class="product-name">NAC Delayed Release 600 mg</div>
+    <div class="product-spec">120 Kapseln · 600 mg NAC mit magensaftresistenten DR Caps®</div>
+    <div class="product-why">Entwickelt mit Dres. Sven Georgi & Thomas Fiedler. Reinheit &gt;98.5%, magenresistente Kapselhülle schützt vor schwefligem Aufstoßen. Lohnt sich besonders bei sensiblem Magen.</div>
+    <a class="product-link" href="https://www.sunday.de/nac-delayed-release-kapseln.html" target="_blank" rel="noopener">sunday.de ↗</a>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~24 €</div>
+    </div>
+    <div class="product-name">NAC Pulver 100 g</div>
+    <div class="product-spec">100 g · 1 Messlöffel = 600 mg · ca. 165 Tage</div>
+    <div class="product-why">Vegan-fermentierte Reinsubstanz aus Maisstärke-Basis. Bestes Preis-Mengen-Verhältnis für längere Pulser-Anwendung. Schmeckt säuerlich-schwefelig — am besten mit Saft maskieren.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">Vitabay</div>
+      <div class="product-price">~22 €</div>
+    </div>
+    <div class="product-name">NAC 600 mg</div>
+    <div class="product-spec">120 Kapseln · 600 mg pro Kapsel</div>
+    <div class="product-why">Vegan, laborgeprüft, ohne Stearate/Nano/Farbstoffe. Günstigste der sauberen Optionen ohne Magenschutz — für Personen ohne Magen-Empfindlichkeit ausreichend.</div>
+  </div>
+</section>
+
+<section class="supp-section" id="b-komplex">
+  <div class="section-header">
+    <div class="section-name">B-Komplex · Aktive Formen</div>
+    <div class="section-role">Empfohlene Tagesdosis: 1 Kapsel morgens mit Mahlzeit. <strong>Aktive Formen</strong> sind P5P (statt Pyridoxin-HCl bei B6), L-Methylfolat (statt synthetischer Folsäure), Methyl-/Adenosyl-/Hydroxocobalamin (statt Cyanocobalamin bei B12). Konventionelle Cyano- und Folsäure-Formen müssen erst metabolisch aktiviert werden — bei MTHFR-Mutationen ein Bottleneck.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~30 €</div>
+    </div>
+    <div class="product-name">Vitamin B-Komplex Bioaktiv (Standard)</div>
+    <div class="product-spec">100 Kapseln · 1/Tag · 3 Monate Reichweite</div>
+    <div class="product-why">B12 als MH3A®-Formel (Methyl-/Hydroxo-/Adenosylcobalamin), Folat aus drei patentierten L-Methylfolat-Quellen (Quatrefolic® + Magnafolate® Pro + Metafolin®), B6 als P5P, B2 als R5P. Plus Citicolin, Betain, Inositol, NADH als Kofaktoren.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~32 €</div>
+    </div>
+    <div class="product-name">Vitamin B-Komplex Bioaktiv Sensitive</div>
+    <div class="product-spec">90 Kapseln · 1/Tag · für methyl-empfindliche Anwender</div>
+    <div class="product-why">B12 nur als Adenosyl- + Hydroxocobalamin (ohne Methyl-Form), kein Methylfolat, kein Betain — speziell für MTHFR-Mutation oder Histamin-Empfindlichkeit mit Methyl-Überstimulation. Plus Glutathion-Vorstufen (Taurin, Glycin, Glutamin).</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">Naturtreu</div>
+      <div class="product-price">~22 €</div>
+    </div>
+    <div class="product-name">B-Komplex Highmind</div>
+    <div class="product-spec">60 Kapseln · aktivierte Formen, günstigere Alternative</div>
+    <div class="product-why">Aktive Formen (P5P, Methylfolat, Methylcobalamin), weniger Kofaktoren als Sunday Natural Forte aber sauber und ausreichend für die meisten Anwender.</div>
+  </div>
+
+  <div class="note-box">
+    Bei MTHFR-Mutation, CPTSD, schwerer Histaminintoleranz oder bekannter Methyl-Überempfindlichkeit lieber die <strong>Sensitive-Variante</strong> wählen. Bei normaler Methylierungskapazität ist der Standard- oder Forte-Komplex zu bevorzugen.
+  </div>
+</section>
+
+<section class="supp-section" id="zink">
+  <div class="section-header">
+    <div class="section-name">Zink · Bisglycinat</div>
+    <div class="section-role">Empfohlene Tagesdosis: 10–25 mg elementares Zink mit Mahlzeit. <strong>Niemals gleichzeitig mit Kupfer, Eisen oder Kalzium</strong> einnehmen (Aufnahme-Konkurrenz an gleichen Transportern).</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~22 €</div>
+    </div>
+    <div class="product-name">Zink-Bisglycinat 25 mg + Vitamin C</div>
+    <div class="product-spec">120 Kapseln · 25 mg elementares Zink + 125 mg Vit C</div>
+    <div class="product-why">Zink-Chelat an Glycin — 40% höhere Bioverfügbarkeit als Gluconat. Synthetisches Bisglycinat aus DE (nicht aus Tier-/Menschenhaar). Vit C unterstützt zusätzlich die Aufnahme.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">natural elements</div>
+      <div class="product-price">~16 €</div>
+    </div>
+    <div class="product-name">Zink-Bisglycinat 15 mg</div>
+    <div class="product-spec">365 Tabletten · 15 mg pro Tag · 1 Jahr Vorrat</div>
+    <div class="product-why">Akazienfaser statt mikrokristalliner Cellulose, vegan, in DE laborgeprüft. Bestes Preis-Mengen-Verhältnis für Erhaltungsdosis.</div>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~35 €</div>
+    </div>
+    <div class="product-name">Zink Komplex Ultra 8 Formen</div>
+    <div class="product-spec">240 Kapseln · 25 mg aus 8 verschiedenen Zinkformen</div>
+    <div class="product-why">Vorbild ist die natürliche Mineralvielfalt in Lebensmitteln (Bisglycinat + Malat + Lysinat + Picolinat + Ascorbat + weiteren). Für anspruchsvolle Anwender oder bei Verträglichkeitsproblemen mit einer Einzelform.</div>
+  </div>
+</section>
+
+<section class="supp-section" id="selen">
+  <div class="section-header">
+    <div class="section-name">Selen</div>
+    <div class="section-role">Empfohlene Tagesdosis: 100–200 µg. Cofaktor der Schilddrüsen-Enzyme (T4 → T3 Umwandlung), Glutathion-Peroxidase, DAO (Histamin-Abbau).</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~16 €</div>
+    </div>
+    <div class="product-name">Selen Selenomethionin 200 µg</div>
+    <div class="product-spec">240 Tabletten · 1/Tag · ca. 8 Monate</div>
+    <div class="product-why">Organische, körpereigene Speicherform. Baut Selenoprotein-Reserven auf — ideal bei dokumentiertem Mangel oder niedrigem Selen-Status. Vorteil: depotbildend.</div>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~25 €</div>
+    </div>
+    <div class="product-name">Zink + Selen Komplex (Natriumselenit-Form)</div>
+    <div class="product-spec">120 Kapseln · 100 µg Selen + 15 mg Zink + 25 mg P5P + 100 mg Vit C</div>
+    <div class="product-why">Anorganisches Natriumselenit — wird direkt in Selenoproteine eingebaut, reichert sich nicht im Körper an. Vorteil: sicherer bei langer Tagesdosis ohne Überspeicherung. Plus Mineral-Synergie-Komplex.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">Vit4ever</div>
+      <div class="product-price">~14 €</div>
+    </div>
+    <div class="product-name">Selen 200 µg Selenomethionin</div>
+    <div class="product-spec">365 Tabletten · 1 Jahr Vorrat</div>
+    <div class="product-why">Günstige Variante, vegan, ohne Stearate. Solide Erhaltungsdosis.</div>
+  </div>
+
+  <div class="note-box">
+    <strong>Selenomethionin vs. Natriumselenit:</strong> Methionin-Form baut Speicher auf (gut bei Mangel), Selenit ist sicherer für lange Tagesdosen ohne Überspeicherung. Walsh Research empfiehlt Methionin-Form für Depletion-Profile, sonst Selenit als Tagesdosis.
+  </div>
+</section>
+
+<section class="supp-section" id="bor">
+  <div class="section-header">
+    <div class="section-name">Bor</div>
+    <div class="section-role">Empfohlene Tagesdosis: 3–6 mg (nach Walsh/Mortensen). Mineralstoff-Wächter — Cofaktor für Vitamin-D-Stoffwechsel, Hormon-Balance, Knochenintegrität. Oft unterschätztes Spurenelement.</div>
+  </div>
+
+  <div class="product premium">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~18 €</div>
+    </div>
+    <div class="product-name">Bor Bioaktiv 3 mg</div>
+    <div class="product-spec">120 Kapseln · 3 mg Bor pro Kapsel · 4 Monate Reichweite</div>
+    <div class="product-why">Aus Bortrioxid + organischem Bor-Glycin-Komplex. Vegan, ohne Zusätze.</div>
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">Vit4ever</div>
+      <div class="product-price">~14 €</div>
+    </div>
+    <div class="product-name">Bor 3 mg</div>
+    <div class="product-spec">365 Tabletten · 3 mg pro Tag · 1 Jahr Vorrat</div>
+    <div class="product-why">Einfache Natriumtetraborat-Form, sehr günstig, vegan. Bei Bor reicht eine einfache Form völlig aus — die Premium-Variante rechtfertigt den Aufpreis hier nicht.</div>
+  </div>
+
+  <div class="note-box">
+    Bei Bor zählt vor allem die Sauberkeit (kein Magnesiumstearat, keine künstlichen Farbstoffe). Eine teurere "patentierte Form" bringt hier keinen messbaren Mehrwert.
+  </div>
+</section>
+
+<section class="supp-section" id="lithium-orotat">
+  <div class="section-header">
+    <div class="section-name">Lithium-Orotat · Low-Dose</div>
+    <div class="section-role">Empfohlene Tagesdosis: <strong>5 mg elementares Lithium</strong> (= ca. 115 mg Lithium-Orotat). Faktor 40× geringer als psychiatrische Hochdosis. Beruhigend, neuroprotektiv, anti-inflammatorisch. Keine Blutspiegelkontrolle nötig bei dieser Dosis.</div>
+  </div>
+
+  <div class="alert-box">
+    <strong>Wichtig:</strong> Bei Schilddrüsen- oder Nierenerkrankung, bestehender Lithium-Verordnung, SSRI/MAO-Hemmer-Einnahme oder Schwangerschaft → <strong>immer mit Arzt absprechen</strong> vor Beginn. Low-Dose-Lithium hat in 5-mg-Dosis keine bekannten Nebenwirkungen, aber Wechselwirkungen mit psychiatrischen Medikamenten möglich.
+  </div>
+
+  <div class="product budget">
+    <div class="product-head">
+      <div class="product-brand">KAL</div>
+      <div class="product-price">~22 €</div>
+    </div>
+    <div class="product-name">Lithium Orotate 5 mg Kapseln</div>
+    <div class="product-spec">120 Veg-Kapseln · 5 mg elementares Lithium · 4 Monate Reichweite</div>
+    <div class="product-why">US-Marke, über iHerb oder Amazon DE erhältlich. Non-GMO, vegan. <strong>Bestes Preis-Leistungs-Verhältnis</strong> — ca. 18 Cent pro Tag bei 5 mg.</div>
+    <a class="product-link" href="https://de.iherb.com" target="_blank" rel="noopener">iherb.com ↗</a>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Klösterl-Apotheke (München)</div>
+      <div class="product-price">auf Anfrage</div>
+    </div>
+    <div class="product-name">Lithium-Orotat Rezepturkapseln</div>
+    <div class="product-spec">Individuelle Dosierung: 1, 2, 5, 10 mg pro Kapsel · pharmazeutische Qualität</div>
+    <div class="product-why">Für Personen mit ärztlicher Begleitung. Apothekenherstellung mit dokumentierter Qualitätskontrolle, ärztlich nachvollziehbar. Empfehlung für strukturierte Anwendung mit Hausarzt.</div>
+    <a class="product-link" href="https://www.kloesterl-apotheke.de" target="_blank" rel="noopener">kloesterl-apotheke.de ↗</a>
+  </div>
+
+  <div class="product">
+    <div class="product-head">
+      <div class="product-brand">Sunday Natural</div>
+      <div class="product-price">~38 €</div>
+    </div>
+    <div class="product-name">Lithium Orotat Tropfen 500 ppm</div>
+    <div class="product-spec">100 ml flüssig · 1 ml = 0.5 mg Li · 10 ml/Tag = 5 mg</div>
+    <div class="product-why">Reinheit &gt;98.5%, in gereinigtem Wasser. Glaspipette für präzise Dosierung — Vorteil bei niedrigerer Einstiegsdosis (0.5–2 mg). Bei voller 5-mg-Dosis allerdings <strong>10× teurer pro Tag</strong> als KAL-Kapseln (~3.80 €/Tag).</div>
+  </div>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────── -->
+
+<div class="disclaimer">
+  Recherche-Stand: Mai 2026. Preise sind UVP und können variieren.<br>
+  Diese Liste ist keine persönliche Empfehlung, sondern Recherche nach den genannten Kriterien.<br>
+  Bei Erkrankungen oder Medikamenteneinnahme bitte mit Arzt oder Heilpraktiker abstimmen.<br><br>
+  🔒 Diese Seite verwendet kein Tracking, keine Cookies, keine Analytics.
+</div>
+
+<div class="footer-link-row">
+  <a href="wandeln_supplement_rechner.html">← zum Rechner</a>
+  <a href="index.html">alle Werkzeuge</a>
+</div>
+
+</body>
+</html>
