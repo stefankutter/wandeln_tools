@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wandeln · Tagesplaner &amp; Erinnerungen</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#0A1520">
+<style>
+:root {
+  --bg:           #0A1520;
+  --bg-card:      #0F1E2A;
+  --bg-edge:      #1A2E3A;
+  --text:         #F0EAD6;
+  --text-muted:   #C5BDA5;
+  --gold:         #C99400;
+  --gold-muted:   #A89870;
+  --teal:         #1D7A6B;
+  --teal-light:   #4DB8A8;
+  --terra:        #C04040;
+  --terra-light:  #E08080;
+  --steel:        #8A95A5;
+  --steel-dim:    #6A7A8A;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 18px 50px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ──────────────────────────────────── */
+.brand {
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--gold);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 11px;
+  color: var(--gold-muted);
+  margin-bottom: 24px;
+  font-style: italic;
+  letter-spacing: 1px;
+  text-align: center;
+  max-width: 480px;
+}
+
+.date-header {
+  text-align: center;
+  margin-bottom: 18px;
+  width: 100%;
+  max-width: 480px;
+}
+.date-day {
+  font-size: 16px;
+  color: var(--text);
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.date-time {
+  font-size: 22px;
+  color: var(--gold);
+  letter-spacing: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── NEXT EVENT BANNER (live mode) ──────────── */
+.next-event {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(29, 122, 107, 0.12);
+  border: 1px solid var(--teal);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  text-align: center;
+  display: none;
+}
+.next-event.visible { display: block; }
+.next-event.firing {
+  background: rgba(201, 148, 0, 0.18);
+  border-color: var(--gold);
+  animation: pulse 2s ease-in-out;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.02); }
+}
+.next-label {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--teal-light);
+  margin-bottom: 4px;
+}
+.next-event.firing .next-label { color: var(--gold); }
+.next-name {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 2px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+.next-countdown {
+  font-size: 13px;
+  color: var(--gold-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── LIVE MODE TOGGLE ────────────────────────── */
+.live-bar {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.live-btn {
+  flex: 1;
+  min-width: 140px;
+  background: none;
+  border: 1px solid var(--bg-edge);
+  color: var(--steel);
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.live-btn:hover {
+  border-color: var(--teal-light);
+  color: var(--teal-light);
+}
+.live-btn.active {
+  background: rgba(29, 122, 107, 0.15);
+  border-color: var(--teal);
+  color: var(--teal-light);
+}
+.live-btn.active::before {
+  content: '● ';
+  color: var(--terra-light);
+  animation: blink 1.5s infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.3; }
+}
+
+/* ── SCHEDULE LIST ───────────────────────────── */
+.section-title {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 8px 0 12px;
+  width: 100%;
+  max-width: 480px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--bg-edge);
+}
+
+.schedule {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 8px;
+}
+
+.slot {
+  background: var(--bg-card);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  transition: all 0.3s;
+}
+.slot.disabled {
+  opacity: 0.5;
+  border-left-color: var(--steel-dim);
+}
+.slot.current {
+  border-left-color: var(--gold);
+  background: rgba(201, 148, 0, 0.08);
+}
+.slot.firing {
+  border-left-color: var(--gold);
+  background: rgba(201, 148, 0, 0.18);
+  animation: pulse 1.5s ease-in-out;
+}
+
+.slot-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slot-time {
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+  min-width: 50px;
+}
+.slot.disabled .slot-time { color: var(--steel-dim); }
+
+.slot-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.slot-name {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.slot-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.slot-action {
+  flex: 0 0 auto;
+}
+
+.audio-btn, .link-btn {
+  background: none;
+  border: 1px solid var(--teal);
+  color: var(--teal-light);
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  white-space: nowrap;
+}
+.audio-btn:hover, .link-btn:hover {
+  background: var(--teal);
+  color: var(--text);
+}
+.audio-btn.playing {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--bg);
+}
+
+/* ── ACTION BAR ──────────────────────────────── */
+.actions {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.action-btn {
+  flex: 1;
+  min-width: 140px;
+  background: none;
+  border: 1px solid var(--bg-edge);
+  color: var(--steel);
+  font-family: Georgia, serif;
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.action-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* ── EDIT PANEL ──────────────────────────────── */
+.edit-panel {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-edge);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+  display: none;
+}
+.edit-panel.visible { display: block; }
+
+.edit-title {
+  font-size: 10.5px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dotted var(--bg-edge);
+}
+.edit-row:last-child { border-bottom: none; }
+
+.edit-name {
+  flex: 1;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  min-width: 0;
+}
+.edit-row.disabled .edit-name { color: var(--steel-dim); }
+
+.edit-time-input {
+  background: var(--bg);
+  border: 1px solid var(--bg-edge);
+  color: var(--gold);
+  font-family: Georgia, serif;
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  width: 80px;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.edit-toggle {
+  background: none;
+  border: 1px solid var(--bg-edge);
+  color: var(--steel);
+  font-family: Georgia, serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.edit-toggle.on {
+  border-color: var(--teal);
+  color: var(--teal-light);
+}
+
+.edit-save {
+  width: 100%;
+  background: none;
+  border: 1.5px solid var(--gold);
+  color: var(--gold);
+  font-family: Georgia, serif;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 14px;
+  transition: all 0.3s;
+}
+.edit-save:hover {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+/* ── HELP / INFO ─────────────────────────────── */
+.help-box {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(29, 122, 107, 0.06);
+  border-left: 2px solid var(--teal);
+  border-radius: 0 6px 6px 0;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  display: none;
+}
+.help-box.visible { display: block; }
+.help-box strong { color: var(--gold); }
+
+/* ── FOOTER ──────────────────────────────────── */
+.disclaimer {
+  width: 100%;
+  max-width: 480px;
+  font-size: 10.5px;
+  color: var(--steel-dim);
+  text-align: center;
+  line-height: 1.85;
+  margin-top: 18px;
+  font-style: italic;
+}
+
+.footer-links {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.footer-links a {
+  color: var(--steel);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--steel-dim);
+}
+.footer-links a:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* ── COMPANION LINK ──────────────────────────── */
+.companion-bar {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.companion-bar a {
+  display: inline-block;
+  color: var(--teal-light);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px dotted var(--teal);
+  border-radius: 16px;
+  transition: all 0.2s;
+}
+.companion-bar a:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+  border-style: solid;
+}
+
+/* hide native audio controls (we use our own buttons) */
+audio { display: none; }
+</style>
+</head>
+<body>
+
+<div class="brand">Wandeln</div>
+<div class="subtitle">Tagesplaner &amp; Erinnerungen · Audio · Live-Modus · Kalender</div>
+
+<div class="date-header">
+  <div class="date-day" id="dateDay">—</div>
+  <div class="date-time" id="dateTime">—</div>
+</div>
+
+<div class="companion-bar">
+  <a href="wandeln_planer.html">✓ Tracking-Planer öffnen →</a>
+</div>
+
+<div class="next-event" id="nextEvent">
+  <div class="next-label" id="nextLabel">Nächste Ankündigung</div>
+  <div class="next-name" id="nextName">—</div>
+  <div class="next-countdown" id="nextCountdown">—</div>
+</div>
+
+<div class="live-bar">
+  <button class="live-btn" id="liveBtn" onclick="toggleLive()">Live-Modus aktivieren</button>
+  <button class="live-btn" id="helpBtn" onclick="toggleHelp()">Hinweise</button>
+</div>
+
+<div class="help-box" id="helpBox">
+  <strong>Live-Modus:</strong> Solange diese Seite geöffnet bleibt, werden die Audios und Benachrichtigungen automatisch zu den eingestellten Zeiten ausgelöst. Erste Audio-Aktivierung tippt iOS frei.<br><br>
+  <strong>Kalender exportieren:</strong> Lädt eine .ics-Datei herunter, die du in Google/Apple/Outlook-Kalender importieren kannst. Erinnerungen kommen dann auch bei geschlossenem Browser — direkt vom System.<br><br>
+  <strong>Einrichten:</strong> Zeiten anpassen oder einzelne Slots deaktivieren. Wird lokal gespeichert.
+</div>
+
+<div class="section-title">Tagesrhythmus</div>
+<div class="schedule" id="scheduleZone"></div>
+
+<div class="section-title">Jederzeit</div>
+<div class="schedule" id="anytimeZone"></div>
+
+<div class="actions">
+  <button class="action-btn" onclick="toggleEdit()">⚙ Einrichten</button>
+  <button class="action-btn" onclick="exportICS()">↓ Kalender (.ics)</button>
+</div>
+
+<div class="edit-panel" id="editPanel">
+  <div class="edit-title">Zeiten anpassen</div>
+  <div id="editZone"></div>
+  <button class="edit-save" onclick="saveEdits()">Speichern</button>
+</div>
+
+<div class="disclaimer">
+  Lokal gespeichert. Keine Daten verlassen deinen Browser.<br>
+  Audios laufen direkt vom Wandeln-Server, kein Tracking.
+</div>
+
+<div class="footer-links">
+  <a href="index.html">← Alle Werkzeuge</a>
+  <a href="wandeln_planer.html">Protokoll-Planer</a>
+  <a href="https://t.me/wandeln_geist" target="_blank" rel="noopener">Telegram-Kanal</a>
+</div>
+
+<!-- Audio elements -->
+<audio id="audio-morgen-ausrichtung" preload="none" src="Morgen-Ausrichtung%20528hz.m4a"></audio>
+<audio id="audio-abend-uebergabe" preload="none" src="Abend-Uebergabe%20432hz.m4a"></audio>
+<audio id="audio-nachtschleife" preload="none" src="Nachtschleife%20Bibelverse.mp3"></audio>
+<audio id="audio-heiliger-geist" preload="none" src="Heiliger%20Geist%20Bibelstellen.mp3"></audio>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// SCHEDULE DEFINITION
+// ─────────────────────────────────────────────────────────
+
+const DEFAULT_SLOTS = [
+  { id: 'morgengebet',        time: '06:00', name: 'Morgengebet',        desc: 'Stille, Gebet, innere Ausrichtung vor dem Tag.', audio: null },
+  { id: 'morgen-ausrichtung', time: '06:05', name: 'Morgen-Ausrichtung', desc: 'Frequenz-Anbindung 528 Hz — geführte Ausrichtung des Tages.', audio: 'audio-morgen-ausrichtung', file: 'Morgen-Ausrichtung%20528hz.m4a' },
+  { id: 'lichtexposition',    time: '06:15', name: 'Lichtexposition',    desc: '10–15 Minuten Sonnenlicht in die Augen — auch bei Bewölkung. Stärkster Hebel für Cortisol- und Melatonin-Rhythmus.', audio: null },
+  { id: 'resonanz-atem',      time: '06:30', name: 'Resonanz-Atem',      desc: 'Kalibrierte Kohärenz-Atmung, 10–15 Minuten.', link: 'wandeln_resonanz_atem.html' },
+  { id: 'mittags-stille',     time: '12:30', name: 'Mittags-Stille',     desc: 'Kurze Unterbrechung, drei bewusste Atemzüge, Wahrnehmung sammeln.', audio: null },
+  { id: 'abend-uebergabe',    time: '18:00', name: 'Abend-Übergabe',     desc: 'Tag abschließen, 432 Hz — Übergabe in den Abend.', audio: 'audio-abend-uebergabe', file: 'Abend-Uebergabe%20432hz.m4a' },
+  { id: 'abend-debriefing',   time: '21:00', name: 'Abend-Debriefing',   desc: 'Tagesreflexion, Dankbarkeit, Loslassen. Drei Fragen: Was war hell? Was hat mich aus dem Rhythmus gebracht? Was lasse ich los?', audio: null },
+  { id: 'nachtschleife',      time: '22:30', name: 'Nachtschleife',      desc: 'Bibelverse zum Einschlafen — endlosschleife möglich.', audio: 'audio-nachtschleife', file: 'Nachtschleife%20Bibelverse.mp3' }
+];
+
+const ANYTIME_SLOTS = [
+  { id: 'heiliger-geist', name: 'Heiliger Geist · Bibelstellen', desc: 'Inspiration und Anbindung — Pfingsten und darüber hinaus.', audio: 'audio-heiliger-geist', file: 'Heiliger%20Geist%20Bibelstellen.mp3' }
+];
+
+// ─────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────
+
+let schedule = loadSchedule();
+let liveActive = false;
+let firedToday = new Set();
+let lastDateStr = new Date().toDateString();
+let currentlyPlaying = null;
+
+// ─────────────────────────────────────────────────────────
+// PERSISTENCE
+// ─────────────────────────────────────────────────────────
+
+function loadSchedule() {
+  try {
+    const raw = localStorage.getItem('wandeln_schedule');
+    if (raw) {
+      const saved = JSON.parse(raw);
+      return DEFAULT_SLOTS.map(def => {
+        const userOverride = saved.find(s => s.id === def.id);
+        if (userOverride) {
+          return { ...def, time: userOverride.time || def.time, enabled: userOverride.enabled !== false };
+        }
+        return { ...def, enabled: true };
+      });
+    }
+  } catch (e) {
+    console.warn('Schedule load failed:', e);
+  }
+  return DEFAULT_SLOTS.map(s => ({ ...s, enabled: true }));
+}
+
+function saveSchedule() {
+  const toSave = schedule.map(s => ({ id: s.id, time: s.time, enabled: s.enabled }));
+  try {
+    localStorage.setItem('wandeln_schedule', JSON.stringify(toSave));
+  } catch (e) {
+    console.warn('Save failed:', e);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────
+
+function render() {
+  renderSchedule();
+  renderAnytime();
+  updateDate();
+  updateNextEvent();
+  highlightCurrent();
+}
+
+function renderSchedule() {
+  const zone = document.getElementById('scheduleZone');
+  let html = '';
+  schedule.forEach(slot => {
+    const disabledClass = slot.enabled ? '' : ' disabled';
+    let action = '';
+    if (slot.audio) {
+      action = `<button class="audio-btn" id="btn-${slot.id}" onclick="playAudio('${slot.audio}', '${slot.id}')">▶ Audio</button>`;
+    } else if (slot.link) {
+      action = `<a class="link-btn" href="${slot.link}">→ Öffnen</a>`;
+    }
+    html += `
+      <div class="slot${disabledClass}" id="slot-${slot.id}">
+        <div class="slot-row">
+          <div class="slot-time">${slot.time}</div>
+          <div class="slot-body">
+            <div class="slot-name">${slot.name}</div>
+            <div class="slot-desc">${slot.desc}</div>
+          </div>
+          <div class="slot-action">${action}</div>
+        </div>
+      </div>`;
+  });
+  zone.innerHTML = html;
+}
+
+function renderAnytime() {
+  const zone = document.getElementById('anytimeZone');
+  let html = '';
+  ANYTIME_SLOTS.forEach(slot => {
+    html += `
+      <div class="slot" id="slot-${slot.id}">
+        <div class="slot-row">
+          <div class="slot-body">
+            <div class="slot-name">${slot.name}</div>
+            <div class="slot-desc">${slot.desc}</div>
+          </div>
+          <div class="slot-action">
+            <button class="audio-btn" id="btn-${slot.id}" onclick="playAudio('${slot.audio}', '${slot.id}')">▶ Audio</button>
+          </div>
+        </div>
+      </div>`;
+  });
+  zone.innerHTML = html;
+}
+
+function updateDate() {
+  const now = new Date();
+  const dayNames = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  const monthNames = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  document.getElementById('dateDay').textContent =
+    `${dayNames[now.getDay()]}, ${now.getDate()}. ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('dateTime').textContent =
+    `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+// ─────────────────────────────────────────────────────────
+// AUDIO HANDLING
+// ─────────────────────────────────────────────────────────
+
+function playAudio(audioId, slotId) {
+  const audio = document.getElementById(audioId);
+  if (!audio) return;
+
+  // If this one is already playing → pause
+  if (currentlyPlaying === audioId && !audio.paused) {
+    audio.pause();
+    audio.currentTime = 0;
+    updateAudioButtons(null);
+    currentlyPlaying = null;
+    return;
+  }
+
+  // Stop any other audio
+  document.querySelectorAll('audio').forEach(a => {
+    if (a.id !== audioId) { a.pause(); a.currentTime = 0; }
+  });
+
+  audio.play().then(() => {
+    currentlyPlaying = audioId;
+    updateAudioButtons(slotId);
+    audio.onended = () => {
+      currentlyPlaying = null;
+      updateAudioButtons(null);
+    };
+  }).catch(err => {
+    console.warn('Audio play failed:', err);
+    alert('Audio-Wiedergabe nicht möglich. Datei evtl. noch nicht hochgeladen oder Browser blockiert Autoplay.');
+  });
+}
+
+function updateAudioButtons(activeId) {
+  document.querySelectorAll('.audio-btn').forEach(btn => {
+    btn.classList.remove('playing');
+    btn.textContent = '▶ Audio';
+  });
+  if (activeId) {
+    const btn = document.getElementById('btn-' + activeId);
+    if (btn) { btn.classList.add('playing'); btn.textContent = '■ Stop'; }
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// LIVE MODE
+// ─────────────────────────────────────────────────────────
+
+function toggleLive() {
+  if (!liveActive) {
+    // Activate: request notifications + unlock audio
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    // Audio unlock trick: play and immediately pause an audio element
+    // This authorizes future programmatic plays in this session (iOS-Safari quirk)
+    const unlockAudio = document.getElementById('audio-morgen-ausrichtung');
+    if (unlockAudio) {
+      const oldVol = unlockAudio.volume;
+      unlockAudio.volume = 0;
+      unlockAudio.play().then(() => {
+        unlockAudio.pause();
+        unlockAudio.currentTime = 0;
+        unlockAudio.volume = oldVol;
+      }).catch(() => {});
+    }
+    liveActive = true;
+    document.getElementById('liveBtn').classList.add('active');
+    document.getElementById('liveBtn').textContent = 'Live-Modus aktiv';
+    document.getElementById('nextEvent').classList.add('visible');
+  } else {
+    liveActive = false;
+    document.getElementById('liveBtn').classList.remove('active');
+    document.getElementById('liveBtn').textContent = 'Live-Modus aktivieren';
+    document.getElementById('nextEvent').classList.remove('visible');
+  }
+  updateNextEvent();
+}
+
+function toggleHelp() {
+  document.getElementById('helpBox').classList.toggle('visible');
+}
+
+// ─────────────────────────────────────────────────────────
+// CLOCK CHECK (every 15 s) — fires triggers in live mode
+// ─────────────────────────────────────────────────────────
+
+function checkClock() {
+  const now = new Date();
+  const today = now.toDateString();
+  if (today !== lastDateStr) {
+    firedToday.clear();
+    lastDateStr = today;
+  }
+  updateDate();
+  updateNextEvent();
+  highlightCurrent();
+
+  if (!liveActive) return;
+  const nowStr = pad(now.getHours()) + ':' + pad(now.getMinutes());
+  schedule.forEach(slot => {
+    if (!slot.enabled) return;
+    if (slot.time === nowStr && !firedToday.has(slot.id)) {
+      firedToday.add(slot.id);
+      triggerSlot(slot);
+    }
+  });
+}
+
+function triggerSlot(slot) {
+  // Visual highlight
+  const el = document.getElementById('slot-' + slot.id);
+  if (el) {
+    el.classList.add('firing');
+    setTimeout(() => el.classList.remove('firing'), 8000);
+  }
+  // Banner update
+  const banner = document.getElementById('nextEvent');
+  banner.classList.add('firing');
+  document.getElementById('nextLabel').textContent = 'Jetzt';
+  document.getElementById('nextName').textContent = slot.name;
+  document.getElementById('nextCountdown').textContent = slot.desc;
+  setTimeout(() => banner.classList.remove('firing'), 8000);
+
+  // Notification
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try {
+      new Notification('Wandeln · ' + slot.name, {
+        body: slot.desc,
+        icon: 'favicon.svg',
+        tag: 'wandeln-' + slot.id
+      });
+    } catch (e) {}
+  }
+
+  // Audio
+  if (slot.audio) {
+    playAudio(slot.audio, slot.id);
+  }
+}
+
+function highlightCurrent() {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  let currentId = null;
+  // Find the slot whose time is closest before now (within 30 min)
+  schedule.forEach(slot => {
+    if (!slot.enabled) return;
+    const [h, m] = slot.time.split(':').map(Number);
+    const slotMin = h * 60 + m;
+    const diff = nowMin - slotMin;
+    if (diff >= 0 && diff <= 30) currentId = slot.id;
+  });
+  document.querySelectorAll('.slot').forEach(el => el.classList.remove('current'));
+  if (currentId) {
+    const el = document.getElementById('slot-' + currentId);
+    if (el) el.classList.add('current');
+  }
+}
+
+function updateNextEvent() {
+  if (!liveActive) return;
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  let nextSlot = null;
+  let smallestDiff = Infinity;
+  schedule.forEach(slot => {
+    if (!slot.enabled) return;
+    const [h, m] = slot.time.split(':').map(Number);
+    let slotMin = h * 60 + m;
+    let diff = slotMin - nowMin;
+    if (diff <= 0) diff += 24 * 60;
+    if (diff < smallestDiff) {
+      smallestDiff = diff;
+      nextSlot = slot;
+    }
+  });
+  if (nextSlot) {
+    document.getElementById('nextLabel').textContent = 'Nächstes Element';
+    document.getElementById('nextName').textContent = nextSlot.name;
+    const h = Math.floor(smallestDiff / 60);
+    const m = smallestDiff % 60;
+    let cd = '';
+    if (h > 0) cd = `in ${h} h ${m} min · ${nextSlot.time}`;
+    else cd = `in ${m} min · ${nextSlot.time}`;
+    document.getElementById('nextCountdown').textContent = cd;
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// EDIT MODE
+// ─────────────────────────────────────────────────────────
+
+function toggleEdit() {
+  const panel = document.getElementById('editPanel');
+  panel.classList.toggle('visible');
+  if (panel.classList.contains('visible')) {
+    renderEdit();
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function renderEdit() {
+  const zone = document.getElementById('editZone');
+  let html = '';
+  schedule.forEach(slot => {
+    const disabledClass = slot.enabled ? '' : ' disabled';
+    const toggleClass = slot.enabled ? ' on' : '';
+    const toggleLabel = slot.enabled ? 'AN' : 'AUS';
+    html += `
+      <div class="edit-row${disabledClass}" id="edit-${slot.id}">
+        <div class="edit-name">${slot.name}</div>
+        <input type="time" class="edit-time-input" id="time-${slot.id}" value="${slot.time}">
+        <button class="edit-toggle${toggleClass}" onclick="toggleSlotEnabled('${slot.id}')">${toggleLabel}</button>
+      </div>`;
+  });
+  zone.innerHTML = html;
+}
+
+function toggleSlotEnabled(id) {
+  const slot = schedule.find(s => s.id === id);
+  if (!slot) return;
+  slot.enabled = !slot.enabled;
+  renderEdit();
+}
+
+function saveEdits() {
+  schedule.forEach(slot => {
+    const inp = document.getElementById('time-' + slot.id);
+    if (inp && inp.value) slot.time = inp.value;
+  });
+  saveSchedule();
+  render();
+  document.getElementById('editPanel').classList.remove('visible');
+}
+
+// ─────────────────────────────────────────────────────────
+// ICS EXPORT
+// ─────────────────────────────────────────────────────────
+
+function exportICS() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = pad(now.getMonth() + 1);
+  const dd = pad(now.getDate());
+
+  // Audio base URL (current page directory)
+  const baseUrl = location.href.replace(/[^/]*$/, '');
+
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Wandeln//Tagesplaner//DE',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH'
+  ];
+
+  const enabledSlots = schedule.filter(s => s.enabled);
+
+  enabledSlots.forEach(slot => {
+    const [h, m] = slot.time.split(':');
+    const startMin = parseInt(h) * 60 + parseInt(m);
+    const endMin = startMin + 15;
+    const endH = Math.floor(endMin / 60) % 24;
+    const endM = endMin % 60;
+
+    const dtstart = `${yyyy}${mm}${dd}T${h}${m}00`;
+    const dtend = `${yyyy}${mm}${dd}T${pad(endH)}${pad(endM)}00`;
+    const dtstamp = `${yyyy}${mm}${dd}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+    let description = escapeICS(slot.desc);
+    if (slot.file) {
+      description += '\\n\\nAudio: ' + baseUrl + slot.file;
+    } else if (slot.link) {
+      description += '\\n\\nÖffnen: ' + baseUrl + slot.link;
+    }
+    description += '\\n\\nWandeln-Wochenplaner';
+
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:wandeln-' + slot.id + '@stefankutter.github.io');
+    lines.push('DTSTAMP:' + dtstamp);
+    lines.push('DTSTART:' + dtstart);
+    lines.push('DTEND:' + dtend);
+    lines.push('SUMMARY:Wandeln · ' + escapeICS(slot.name));
+    lines.push('DESCRIPTION:' + description);
+    lines.push('RRULE:FREQ=DAILY');
+    lines.push('BEGIN:VALARM');
+    lines.push('ACTION:DISPLAY');
+    lines.push('TRIGGER:PT0M');
+    lines.push('DESCRIPTION:' + escapeICS(slot.name));
+    lines.push('END:VALARM');
+    lines.push('END:VEVENT');
+  });
+
+  lines.push('END:VCALENDAR');
+
+  const ics = lines.join('\r\n');
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'wandeln-rhythmus.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function escapeICS(text) {
+  return (text || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+}
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+
+render();
+checkClock();
+setInterval(checkClock, 15000); // every 15 seconds
+</script>
+
+</body>
+</html>

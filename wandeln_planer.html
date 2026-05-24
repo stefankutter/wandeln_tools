@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wandeln · Protokoll-Planer</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta name="theme-color" content="#0A1520">
 <style>
 :root {
   --navy: #0A1520;
@@ -43,7 +45,7 @@ body {
 
 .brand-col { display: flex; flex-direction: column; }
 .brand { font-size: 11px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; }
-.brand-sub { font-size: 10px; color: var(--dim); font-style: italic; letter-spacing: 1px; margin-top: 2px; }
+.brand-sub { font-size: 10px; color: var(--muted); font-style: italic; letter-spacing: 1px; margin-top: 2px; }
 
 .week-nav { display: flex; align-items: center; gap: 10px; }
 .week-nav button {
@@ -53,6 +55,29 @@ body {
 }
 .week-nav button:hover { border-color: var(--gold); color: var(--gold); }
 .week-label { font-size: 12px; color: var(--muted); letter-spacing: 1px; white-space: nowrap; }
+
+/* ── COMPANION BAR ──────────────────────────── */
+.companion-bar {
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--navy3);
+  text-align: center;
+}
+.companion-bar a {
+  display: inline-block;
+  color: var(--teal-light);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-decoration: none;
+  padding: 4px 12px;
+  border: 1px dotted var(--teal);
+  border-radius: 16px;
+  transition: all 0.2s;
+}
+.companion-bar a:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+  border-style: solid;
+}
 
 /* ── TABS ────────────────────────────────────── */
 .tabs {
@@ -100,7 +125,7 @@ body {
 
 .day-name {
   font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--dim); text-align: center; margin-bottom: 4px;
+  color: var(--muted); text-align: center; margin-bottom: 4px;
 }
 .day-num {
   font-size: 18px; text-align: center; color: var(--linen);
@@ -139,9 +164,9 @@ body {
   padding: 12px;
   text-align: center;
 }
-.goal-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+.goal-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .goal-val { font-size: 24px; color: var(--teal-light); }
-.goal-target { font-size: 10px; color: var(--dim); margin-top: 2px; }
+.goal-target { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
 .mood-chart {
   background: var(--navy2);
@@ -150,11 +175,11 @@ body {
   padding: 14px;
   margin-bottom: 16px;
 }
-.chart-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.chart-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 40px; }
 .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .chart-bar { width: 100%; border-radius: 2px 2px 0 0; background: var(--navy3); transition: height 0.3s; min-height: 2px; }
-.chart-day-lbl { font-size: 8px; color: var(--dim); letter-spacing: 1px; }
+.chart-day-lbl { font-size: 8px; color: var(--muted); letter-spacing: 1px; }
 
 /* ── TOOLS ROW ───────────────────────────────── */
 .tools-row {
@@ -162,7 +187,7 @@ body {
 }
 .tool-link {
   background: none; border: 1px solid var(--navy3);
-  color: var(--teal); font-family: Georgia, serif; font-size: 11px;
+  color: var(--teal-light); font-family: Georgia, serif; font-size: 11px;
   letter-spacing: 1px; padding: 7px 14px; border-radius: 20px;
   cursor: pointer; text-decoration: none; transition: all 0.2s;
   display: inline-block;
@@ -173,6 +198,7 @@ body {
 .day-header {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 16px;
+  flex-wrap: wrap; gap: 12px;
 }
 .day-title { font-size: 20px; color: var(--linen); letter-spacing: 1px; }
 .day-date { font-size: 11px; color: var(--muted); font-style: italic; }
@@ -214,11 +240,11 @@ body {
 
 .check-text { flex: 1; }
 .check-name { font-size: 13px; color: var(--linen); }
-.check-sub { font-size: 10px; color: var(--dim); margin-top: 2px; font-style: italic; }
+.check-sub { font-size: 10px; color: var(--muted); margin-top: 2px; font-style: italic; }
 .check-item.checked .check-name { color: var(--muted); text-decoration: line-through; }
 
 .check-link {
-  font-size: 10px; color: var(--teal); text-decoration: none;
+  font-size: 10px; color: var(--teal-light); text-decoration: none;
   border: 1px solid var(--teal); padding: 2px 8px;
   border-radius: 10px; white-space: nowrap; flex-shrink: 0;
 }
@@ -240,6 +266,25 @@ body {
 .mood-star:hover { transform: scale(1.2); }
 
 /* ── SHOPPING ────────────────────────────────── */
+.nem-banner-mini {
+  background: rgba(29, 122, 107, 0.12);
+  border: 1px solid var(--teal);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.nem-banner-mini a {
+  display: block;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: var(--linen);
+  font-size: 12px;
+  line-height: 1.6;
+  transition: background 0.2s;
+}
+.nem-banner-mini a:hover { background: rgba(29, 122, 107, 0.18); }
+.nem-banner-mini strong { color: var(--gold); letter-spacing: 1px; }
+
 .shop-intro {
   font-size: 12px; color: var(--muted); margin-bottom: 16px;
   line-height: 1.8; font-style: italic;
@@ -266,11 +311,11 @@ body {
 .shop-badge.vegan { background: #0A1A14; color: #6AD4B0; border: 1px solid #2A8060; }
 
 .shop-brand { font-size: 12px; color: var(--teal-light); margin-bottom: 3px; }
-.shop-note { font-size: 11px; color: var(--dim); line-height: 1.7; }
-.shop-where { font-size: 10px; color: #2A4A3A; margin-top: 4px; font-style: italic; }
+.shop-note { font-size: 11px; color: var(--muted); line-height: 1.7; }
+.shop-where { font-size: 10px; color: #4A6A7A; margin-top: 4px; font-style: italic; }
 
 .privacy-note {
-  font-size: 10px; color: var(--dim); text-align: center;
+  font-size: 10px; color: var(--muted); text-align: center;
   margin-top: 24px; line-height: 1.8; font-style: italic;
 }
 </style>
@@ -287,6 +332,10 @@ body {
     <div class="week-label" id="weekLabel">KW –</div>
     <button onclick="changeWeek(1)">›</button>
   </div>
+</div>
+
+<div class="companion-bar">
+  <a href="wandeln_erinnerungen.html">⏰ Erinnerungen einrichten →</a>
 </div>
 
 <div class="tabs">
@@ -324,9 +373,11 @@ body {
   </div>
 
   <div class="tools-row">
-    <a class="tool-link" href="wandeln_atem_timer.html" target="_blank">▷ 4-7-8 Atemübung</a>
+    <a class="tool-link" href="wandeln_resonanz_atem.html" target="_blank">▷ Resonanz-Atem</a>
     <a class="tool-link" href="wandeln_coherent_breathing.html" target="_blank">▷ Coherent Breathing</a>
+    <a class="tool-link" href="wandeln_atem_timer.html" target="_blank">▷ 4-7-8 Atemübung</a>
     <a class="tool-link" href="wandeln_supplement_rechner.html" target="_blank">▷ Supplement-Rechner</a>
+    <a class="tool-link" href="wandeln_erinnerungen.html" target="_blank">⏰ Erinnerungen</a>
   </div>
 
 
@@ -369,6 +420,13 @@ body {
 
 <!-- ── EINKAUF ────────────────────────────────── -->
 <div class="panel" id="panel-shop">
+
+  <div class="nem-banner-mini">
+    <a href="NEM-Liste.html">
+      <strong>NEM-Liste →</strong> Vollständige Produkte-Referenz mit Markenvergleich, Preisen, Bioverfügbarkeits-Begründungen für alle 14 Schlüssel-Supplemente.
+    </a>
+  </div>
+
   <div class="shop-intro">
     Qualitätskriterien: natürliche oder bioidentische Moleküle · keine Nanopartikel-Füllstoffe
     (Siliziumdioxid E551 vermeiden) · keine künstlichen Farbstoffe · dritte Parteien
@@ -481,16 +539,19 @@ var CHECKLIST = [
   ]},
   { section: 'Morgen · Gewohnheiten', items: [
     { id: 'pray_am',     name: 'Morgengebet / Ausrichtung', sub: 'Phil 4,6–7 · 3–5 Minuten', link: null },
-    { id: 'breath_478',  name: '4-7-8 Atemübung',          sub: '4 Runden · Vagus aktivieren', link: 'wandeln_atem_timer.html' },
-    { id: 'breath_coh',  name: 'Coherent Breathing',       sub: '5 Minuten · HRV-Training', link: 'wandeln_coherent_breathing.html' },
-    { id: 'stretch',     name: 'Dehnung + Kopfmassage',    sub: '5–10 Min · Nacken, Schultern, Kopf' },
+    { id: 'light',       name: 'Lichtexposition',           sub: '10–15 Min Sonnenlicht in die Augen · stärkster Circadian-Hebel' },
+    { id: 'breath_478',  name: '4-7-8 Atemübung',           sub: '4 Runden · Vagus aktivieren', link: 'wandeln_atem_timer.html' },
+    { id: 'breath_coh',  name: 'Coherent Breathing',        sub: '5 Minuten · HRV-Training', link: 'wandeln_coherent_breathing.html' },
+    { id: 'breath_res',  name: 'Resonanz-Atem (kalibriert)', sub: '10–15 Min · individuell kalibrierte Kohärenz', link: 'wandeln_resonanz_atem.html' },
+    { id: 'stretch',     name: 'Dehnung + Kopfmassage',     sub: '5–10 Min · Nacken, Schultern, Kopf' },
     { id: 'hum',         name: 'Summen / Worship / Singen', sub: '528 Hz · Vagus-Stimulation direkt' },
     { id: 'cinnamon',    name: 'Zimt-Tee oder Zimt-Kaffee', sub: 'Ceylon-Zimt · Blutzucker-Stabilisierung' },
   ]},
   { section: 'Mahlzeiten', items: [
-    { id: 'pray_meal',   name: 'Gebet vor Hauptmahlzeit',  sub: 'Pause · Dankbarkeit · Mundtor bewusst öffnen' },
-    { id: 'omega',       name: 'Omega-3 zur Mahlzeit',     sub: '2g EPA+DHA · mit fetthaltiger Mahlzeit' },
-    { id: 'oliveoil',   name: 'Olivenöl extra vergine',   sub: '3–4 EL täglich · COX-Hemmung wie Ibuprofen' },
+    { id: 'pray_meal',     name: 'Gebet vor Hauptmahlzeit', sub: 'Pause · Dankbarkeit · Mundtor bewusst öffnen' },
+    { id: 'funktion',      name: 'Funktionsmahlzeit',       sub: 'Z.B. Kraft-Pesto, Wildkräuter, fermentiertes Gemüse · protokoll-spezifisch' },
+    { id: 'omega',         name: 'Omega-3 zur Mahlzeit',    sub: '2g EPA+DHA · mit fetthaltiger Mahlzeit' },
+    { id: 'oliveoil',      name: 'Olivenöl extra vergine',  sub: '3–4 EL täglich · COX-Hemmung wie Ibuprofen' },
   ]},
   { section: 'Bewegung', items: [
     { id: 'walk',        name: 'Spaziergang 1+ Stunde',    sub: 'BDNF +200% · bilateral · 3× pro Woche Ziel' },
@@ -777,7 +838,7 @@ function exportCSV() {
     }).join(',');
   }).join('\n');
 
-  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   var d0 = days[0], d6 = days[6];
