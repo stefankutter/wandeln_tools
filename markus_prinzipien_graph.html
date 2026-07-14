@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geistliche Prinzipien im Markusevangelium – Wandeln</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;overflow:hidden}
+body{background:#1a1a2e;color:#f5f1e8;font-family:'Inter',-apple-system,sans-serif;font-weight:300;-webkit-font-smoothing:antialiased}
+header{position:absolute;top:0;left:0;right:0;padding:22px 32px 0;pointer-events:none;z-index:10}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:.3px}
+.subtitle{font-size:12px;opacity:.6;margin:0;letter-spacing:.5px;text-transform:uppercase}
+#reset{position:absolute;top:22px;right:32px;background:0 0;color:#f5f1e8;border:1px solid rgba(245,241,232,.3);padding:7px 14px;border-radius:3px;font-family:inherit;font-size:11px;cursor:pointer;letter-spacing:.8px;text-transform:uppercase;z-index:10;transition:all .2s}
+#reset:hover{background:rgba(245,241,232,.08);border-color:rgba(245,241,232,.6)}
+svg{width:100vw;height:100vh;display:block;cursor:grab}
+svg:active{cursor:grabbing}
+.cluster-label{font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;font-weight:600;fill:#f5f1e8;pointer-events:none;text-anchor:middle;paint-order:stroke;stroke:#1a1a2e;stroke-width:5px;stroke-linejoin:round}
+.tooltip{position:fixed;background:rgba(20,20,36,.97);border:1px solid rgba(245,241,232,.22);border-radius:4px;padding:12px 16px;max-width:420px;pointer-events:none;opacity:0;transition:opacity .15s;font-size:13px;line-height:1.55;z-index:20;color:#f5f1e8}
+.tooltip .ref{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:15px;margin-bottom:6px;display:block;letter-spacing:.2px}
+.tooltip .text{opacity:.82;font-style:italic;font-weight:300}
+.tooltip .hint{display:block;margin-top:8px;font-size:10px;opacity:.4;letter-spacing:.5px}
+.legend{position:absolute;bottom:20px;left:32px;font-size:11px;opacity:.5;max-width:500px;line-height:1.6;pointer-events:none;letter-spacing:.2px}
+.nav{position:absolute;bottom:20px;right:32px;font-size:11px;opacity:.5;text-align:right;line-height:1.8;z-index:10}
+.nav a{color:#f5f1e8;text-decoration:none;border-bottom:1px solid rgba(245,241,232,.3)}
+.nav a:hover{opacity:1;border-color:#f5f1e8}
+@media(max-width:640px){header{padding:16px 20px 0}h1{font-size:20px}.subtitle{font-size:10px}#reset{top:16px;right:20px;padding:6px 10px;font-size:10px}.legend{left:20px;right:20px;bottom:16px;font-size:10px}.cluster-label{font-size:16px}.nav{display:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>Geistliche Prinzipien im Markusevangelium</h1>
+<p class="subtitle">Wandeln-Fokus-Edition · 52 Kern-Prinzipien in 11 Clustern</p>
+</header>
+<button id="reset">Reset</button>
+<svg></svg>
+<div class="tooltip" id="tooltip"></div>
+<div class="legend">Ziehe Knoten · Scrollen zoomt · Hover zeigt den Vers im Originaltext · Hover auf einem Cluster hebt alle zugehörigen Prinzipien hervor</div>
+<div class="nav">
+<a href="https://stefankutter.github.io/wandeln_tools/matthaeus_prinzipien_graph.html">← Matthäus-Graph</a><br>
+<a href="https://stefankutter.github.io/wandeln_tools/">Alle Werkzeuge</a><br>
+<a href="https://t.me/wandeln_geist">Telegram-Kanal</a>
+</div>
+<script>
+const data = {
+nodes: [
+{id:"c1",label:"Saat & Ernte",type:"cluster",color:"#E8B923",size:38},
+{id:"c2",label:"Vergebung",type:"cluster",color:"#5FA8D3",size:32},
+{id:"c3",label:"Demut ↔ Erhöhung",type:"cluster",color:"#8B5FBF",size:32},
+{id:"c4",label:"Glaube bewegt Berge",type:"cluster",color:"#C94C4C",size:42},
+{id:"c5",label:"Dienen = Größe",type:"cluster",color:"#4A9D7C",size:32},
+{id:"c6",label:"Reich zuerst",type:"cluster",color:"#D4A017",size:35},
+{id:"c7",label:"Richtet nicht",type:"cluster",color:"#6E8B3D",size:28},
+{id:"c8",label:"Schatz & Herz",type:"cluster",color:"#B87333",size:28},
+{id:"c9",label:"Paradox des Lebens",type:"cluster",color:"#3A506B",size:36},
+{id:"c10",label:"Frucht & Wesen",type:"cluster",color:"#7D9D3A",size:44},
+{id:"c11",label:"Wachen & Beten",type:"cluster",color:"#D4776B",size:35},
+// Saat & Ernte
+{id:"p1_1",label:"Mk 4,3",title:"Der Sämann sät",type:"principle",cluster:"c1",text:"Siehe, der Sämann ging aus zu säen."},
+{id:"p1_2",label:"Mk 4,14",title:"Der Sämann sät das Wort",type:"principle",cluster:"c1",text:"Der Sämann sät das Wort."},
+{id:"p1_3",label:"Mk 4,26",title:"Samen auf die Erde",type:"principle",cluster:"c1",text:"Also ist das Reich Gottes, wie wenn ein Mensch den Samen auf die Erde wirft."},
+{id:"p1_4",label:"Mk 4,28",title:"Erde bringt Frucht von selbst",type:"principle",cluster:"c1",text:"Die Erde bringt von selbst Frucht hervor: zuerst den Halm, danach die Ähre, danach den vollen Weizen in der Ähre."},
+{id:"p1_5",label:"Mk 4,31",title:"Senfkorn",type:"principle",cluster:"c1",text:"Wie ein Senfkorn, welches, wenn es auf die Erde gesät wird, kleiner ist als alle Samen, die auf der Erde sind."},
+{id:"p1_6",label:"Mk 4,32",title:"Wird größer als alle Kräuter",type:"principle",cluster:"c1",text:"Und wenn es gesät ist, so schießt es auf und wird größer als alle Kräuter und treibt große Zweige."},
+// Vergebung
+{id:"p2_1",label:"Mk 2,5",title:"Deine Sünden sind vergeben",type:"principle",cluster:"c2",text:"Kind, deine Sünden sind vergeben."},
+{id:"p2_2",label:"Mk 11,25",title:"Vergebet, wenn ihr betet",type:"principle",cluster:"c2",text:"Und wenn ihr stehet und betet, so vergebet, wenn ihr etwas wider jemanden habt, auf daß auch euer Vater, der in den Himmeln ist, euch eure Übertretungen vergebe."},
+{id:"p2_3",label:"Mk 14,24",title:"Blut des neuen Bundes",type:"principle",cluster:"c2",text:"Dieses ist mein Blut, das des neuen Bundes, welches für viele vergossen wird."},
+// Demut ↔ Erhöhung
+{id:"p3_1",label:"Mk 9,35",title:"Letzter und aller Diener",type:"principle",cluster:"c3",text:"Wenn jemand der Erste sein will, so soll er der Letzte von allen und aller Diener sein."},
+{id:"p3_2",label:"Mk 10,31",title:"Erste werden Letzte",type:"principle",cluster:"c3",text:"Aber viele Erste werden Letzte, und Letzte Erste sein."},
+{id:"p3_3",label:"Mk 10,43",title:"Groß werden = dienen",type:"principle",cluster:"c3",text:"Wer irgend unter euch groß werden will, soll euer Diener sein."},
+// Glaube bewegt Berge
+{id:"p4_1",label:"Mk 4,40",title:"Habt ihr keinen Glauben?",type:"principle",cluster:"c4",text:"Warum seid ihr so furchtsam? Wie, habt ihr keinen Glauben?"},
+{id:"p4_2",label:"Mk 5,36",title:"Fürchte dich nicht, glaube nur",type:"principle",cluster:"c4",text:"Fürchte dich nicht; glaube nur."},
+{id:"p4_3",label:"Mk 9,23",title:"Dem Glaubenden alles möglich",type:"principle",cluster:"c4",text:"Dem Glaubenden ist alles möglich."},
+{id:"p4_4",label:"Mk 10,27",title:"Bei Gott alle Dinge möglich",type:"principle",cluster:"c4",text:"Bei Menschen ist es unmöglich, aber nicht bei Gott; denn bei Gott sind alle Dinge möglich."},
+{id:"p4_5",label:"Mk 11,22",title:"Habt Glauben an Gott",type:"principle",cluster:"c4",text:"Habt Glauben an Gott."},
+{id:"p4_6",label:"Mk 11,24",title:"Glaubet, daß ihr es empfangt",type:"principle",cluster:"c4",text:"Alles, um was irgend ihr betet und bittet, glaubet, daß ihr es empfangen habt, und es wird euch werden."},
+{id:"p4_7",label:"Mk 16,16",title:"Wer glaubt wird errettet",type:"principle",cluster:"c4",text:"Wer da glaubt und getauft wird, wird errettet werden; wer aber nicht glaubt, wird verdammt werden."},
+// Dienen = Größe
+{id:"p5_1",label:"Mk 10,43b",title:"Euer Diener sein",type:"principle",cluster:"c5",text:"Wer irgend unter euch groß werden will, soll euer Diener sein."},
+{id:"p5_2",label:"Mk 10,45",title:"Dienen und Leben geben",type:"principle",cluster:"c5",text:"Denn auch der Sohn des Menschen ist nicht gekommen, um bedient zu werden, sondern um zu dienen und sein Leben zu geben als Lösegeld für viele."},
+{id:"p5_3",label:"Mk 12,31",title:"Nächsten lieben wie dich selbst",type:"principle",cluster:"c5",text:"Du sollst deinen Nächsten lieben wie dich selbst. Es ist kein anderes Gebot größer als diese."},
+// Reich zuerst
+{id:"p6_1",label:"Mk 1,15",title:"Tut Buße und glaubt",type:"principle",cluster:"c6",text:"Tut Buße und glaubt an das Evangelium."},
+{id:"p6_2",label:"Mk 4,11",title:"Geheimnis des Reiches",type:"principle",cluster:"c6",text:"Euch ist das Geheimnis des Reiches Gottes gegeben; jenen aber, die draußen sind, geschieht alles in Gleichnissen."},
+{id:"p6_3",label:"Mk 10,15",title:"Reich wie ein Kindlein",type:"principle",cluster:"c6",text:"Wer irgend das Reich Gottes nicht aufnehmen wird wie ein Kindlein, wird nicht in dasselbe eingehen."},
+{id:"p6_4",label:"Mk 12,29",title:"Höre Israel, der Herr ist einer",type:"principle",cluster:"c6",text:"Das erste Gebot von allen ist: Höre, Israel: Der Herr, unser Gott, ist ein einiger Herr."},
+// Richtet nicht
+{id:"p7_1",label:"Mk 4,24",title:"Mit welchem Maße ihr messet",type:"principle",cluster:"c7",text:"Mit welchem Maße ihr messet, wird euch gemessen werden, und euch wird noch hinzugefügt werden."},
+{id:"p7_2",label:"Mk 12,17",title:"Gebet dem Kaiser",type:"principle",cluster:"c7",text:"Gebet dem Kaiser, was des Kaisers ist, und Gott, was Gottes ist!"},
+// Schatz & Herz
+{id:"p8_1",label:"Mk 6,52",title:"Herz war verhärtet",type:"principle",cluster:"c8",text:"Denn sie waren durch die Brote nicht verständig geworden, denn ihr Herz war verhärtet."},
+{id:"p8_2",label:"Mk 7,15",title:"Was aus dem Menschen kommt",type:"principle",cluster:"c8",text:"Es ist nichts außerhalb des Menschen, was in ihn hineingeht, das ihn verunreinigen kann; sondern was aus dem Menschen herausgeht, ist es, was den Menschen verunreinigt."},
+// Paradox des Lebens
+{id:"p9_1",label:"Mk 8,34",title:"Kreuz aufnehmen",type:"principle",cluster:"c9",text:"Wenn jemand mir nachkommen will, der verleugne sich selbst und nehme sein Kreuz auf und folge mir nach."},
+{id:"p9_2",label:"Mk 8,35",title:"Leben verlieren um zu finden",type:"principle",cluster:"c9",text:"Denn wer irgend sein Leben erretten will, wird es verlieren; wer aber irgend sein Leben verliert um meinetwillen und um des Evangeliums willen, wird es erretten."},
+{id:"p9_3",label:"Mk 2,19",title:"Bräutigam bei ihnen",type:"principle",cluster:"c9",text:"Solange sie den Bräutigam bei sich haben, können sie nicht fasten."},
+{id:"p9_4",label:"Mk 2,27",title:"Sabbat um des Menschen willen",type:"principle",cluster:"c9",text:"Der Sabbat ist um des Menschen willen geschaffen worden, nicht der Mensch um des Sabbats willen."},
+{id:"p9_5",label:"Mk 13,31",title:"Meine Worte vergehen nicht",type:"principle",cluster:"c9",text:"Der Himmel und die Erde werden vergehen, meine Worte aber sollen nicht vergehen."},
+// Frucht & Wesen
+{id:"p10_1",label:"Mk 3,24",title:"Reich entzweit → verwüstet",type:"principle",cluster:"c10",text:"Und wenn ein Reich wider sich selbst entzweit ist, so kann jenes Reich nicht bestehen."},
+{id:"p10_2",label:"Mk 3,25",title:"Haus entzweit → steht nicht",type:"principle",cluster:"c10",text:"Und wenn ein Haus wider sich selbst entzweit ist, so wird jenes Haus nicht bestehen können."},
+{id:"p10_3",label:"Mk 3,27",title:"Den Starken binden",type:"principle",cluster:"c10",text:"Niemand kann in das Haus des Starken eindringen und seinen Hausrat rauben, wenn er nicht vorher den Starken bindet."},
+{id:"p10_4",label:"Mk 3,29",title:"Lästerung des Geistes",type:"principle",cluster:"c10",text:"Wer aber irgend gegen den Heiligen Geist lästert, hat keine Vergebung in Ewigkeit."},
+{id:"p10_5",label:"Mk 3,35",title:"Wer Gottes Willen tut",type:"principle",cluster:"c10",text:"Denn wer irgend den Willen Gottes tut, dieser ist mein Bruder und meine Schwester und meine Mutter."},
+{id:"p10_6",label:"Mk 4,21",title:"Lampe auf das Gestell",type:"principle",cluster:"c10",text:"Kommt etwa die Lampe, auf daß sie unter den Scheffel oder unter das Bett gestellt werde? Nicht, auf daß sie auf das Lampengestell gestellt werde?"},
+{id:"p10_7",label:"Mk 4,22",title:"Nichts verborgen",type:"principle",cluster:"c10",text:"Denn es ist nichts verborgen, was nicht offenbar werden soll, noch ist etwas geheim geschehen, sondern daß es ans Licht komme."},
+{id:"p10_8",label:"Mk 4,25",title:"Wer hat, dem wird gegeben",type:"principle",cluster:"c10",text:"Denn wer irgend hat, dem wird gegeben werden; und wer nicht hat, von dem wird selbst, was er hat, weggenommen werden."},
+// Wachen & Beten (Markus-eigen)
+{id:"p11_1",label:"Mk 9,29",title:"Nur durch Gebet und Fasten",type:"principle",cluster:"c11",text:"Diese Art kann durch nichts ausfahren, als nur durch Gebet und Fasten."},
+{id:"p11_2",label:"Mk 13,13",title:"Wer ausharrt bis ans Ende",type:"principle",cluster:"c11",text:"Wer aber ausharrt bis ans Ende, dieser wird errettet werden."},
+{id:"p11_3",label:"Mk 14,38",title:"Geist willig, Fleisch schwach",type:"principle",cluster:"c11",text:"Wachet und betet, auf daß ihr nicht in Versuchung kommet; der Geist zwar ist willig, das Fleisch aber schwach."},
+{id:"p11_4",label:"Mk 3,4",title:"Am Sabbat Gutes tun",type:"principle",cluster:"c11",text:"Ist es erlaubt, am Sabbat Gutes zu tun oder Böses zu tun? Das Leben zu retten oder zu töten?"}
+],
+edges: [
+{source:"c1",target:"c10",weight:0.9,label:"Saat zeigt sich als Frucht"},
+{source:"c1",target:"c6",weight:0.7,label:"Saat des Reiches"},
+{source:"c2",target:"c7",weight:0.8,label:"Vergeben statt richten"},
+{source:"c3",target:"c5",weight:0.95,label:"Dienen = sich erniedrigen"},
+{source:"c3",target:"c9",weight:0.8,label:"Sich verlieren = sich erniedrigen"},
+{source:"c4",target:"c11",weight:0.75,label:"Glaube braucht Gebet"},
+{source:"c4",target:"c9",weight:0.7,label:"Glaube riskiert das Leben"},
+{source:"c5",target:"c6",weight:0.65,label:"Dienst im Reich"},
+{source:"c6",target:"c8",weight:0.7,label:"Herz auf das Reich richten"},
+{source:"c8",target:"c10",weight:0.85,label:"Herz zeigt sich in Frucht"},
+{source:"c9",target:"c4",weight:0.75,label:"Paradox braucht Glauben"},
+{source:"c10",target:"c1",weight:0.9,label:"Frucht = Ernte"},
+{source:"c2",target:"c3",weight:0.6,label:"Vergeben braucht Demut"},
+{source:"c11",target:"c9",weight:0.6,label:"Wachen im Paradox"}
+]
+};
+
+const svg = d3.select("svg");
+const tooltip = document.getElementById("tooltip");
+let width = window.innerWidth, height = window.innerHeight;
+const zoomG = svg.append("g");
+const zoom = d3.zoom().scaleExtent([0.35,3]).on("zoom",e=>zoomG.attr("transform",e.transform));
+svg.call(zoom);
+
+const clusterNodes = data.nodes.filter(n=>n.type==="cluster");
+const principleNodes = data.nodes.filter(n=>n.type==="principle");
+const clusterLinks = data.edges.map(e=>({source:e.source,target:e.target,weight:e.weight,label:e.label,kind:"cluster"}));
+const membershipLinks = principleNodes.map(p=>({source:p.cluster,target:p.id,weight:1,kind:"membership"}));
+const allLinks = [...clusterLinks,...membershipLinks];
+
+function lighten(hex,amt){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return"rgb("+Math.round(r+(255-r)*amt)+","+Math.round(g+(255-g)*amt)+","+Math.round(b+(255-b)*amt)+")"}
+const clusterById=new Map(clusterNodes.map(c=>[c.id,c]));
+principleNodes.forEach(p=>{p.color=lighten(clusterById.get(p.cluster).color,0.28)});
+
+const simulation = d3.forceSimulation(data.nodes)
+.force("link",d3.forceLink(allLinks).id(d=>d.id).strength(d=>d.kind==="cluster"?0.08:0.95).distance(d=>d.kind==="cluster"?140:68))
+.force("charge",d3.forceManyBody().strength(d=>d.type==="cluster"?-900:-90))
+.force("center",d3.forceCenter(width/2,height/2))
+.force("collide",d3.forceCollide().radius(d=>d.type==="cluster"?d.size+12:18))
+.alphaDecay(0.025);
+
+function fitGraph(animated){
+const pad=70,xs=data.nodes.map(n=>n.x),ys=data.nodes.map(n=>n.y);
+const mnx=Math.min(...xs),mxx=Math.max(...xs),mny=Math.min(...ys),mxy=Math.max(...ys);
+const dx=mxx-mnx+100,dy=mxy-mny+140,cx=(mnx+mxx)/2,cy=(mny+mxy)/2;
+const sc=Math.min((width-pad*2)/dx,(height-pad*2)/dy,1.6),tx=width/2-sc*cx,ty=height/2-sc*cy;
+const t=d3.zoomIdentity.translate(tx,ty).scale(sc);
+animated?svg.transition().duration(900).ease(d3.easeCubicInOut).call(zoom.transform,t):svg.call(zoom.transform,t)}
+
+function updatePositions(){
+edgeSel.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+principleSel.attr("cx",d=>d.x).attr("cy",d=>d.y);
+clusterSel.attr("cx",d=>d.x).attr("cy",d=>d.y);
+labelSel.attr("x",d=>d.x).attr("y",d=>d.y+d.size+20)}
+
+// Pre-warm
+simulation.stop();
+for(let i=0;i<400;i++)simulation.tick();
+
+const edgeSel=zoomG.append("g").selectAll("line").data(clusterLinks).join("line")
+.attr("stroke","#f5f1e8").attr("stroke-opacity",d=>0.12+d.weight*0.22).attr("stroke-width",d=>0.6+d.weight*2.6).attr("stroke-linecap","round");
+
+const principleSel=zoomG.append("g").selectAll("circle").data(principleNodes).join("circle")
+.attr("r",13).attr("fill",d=>d.color).attr("stroke","#1a1a2e").attr("stroke-width",1.8).style("cursor","pointer").call(makeDrag(simulation));
+
+const clusterSel=zoomG.append("g").selectAll("circle").data(clusterNodes).join("circle")
+.attr("r",d=>d.size).attr("fill",d=>d.color).attr("stroke","#f5f1e8").attr("stroke-width",1.2).attr("fill-opacity",0.85).style("cursor","grab").call(makeDrag(simulation));
+
+const labelSel=zoomG.append("g").selectAll("text").data(clusterNodes).join("text")
+.attr("class","cluster-label").text(d=>d.label);
+
+updatePositions();
+simulation.on("tick",updatePositions);
+fitGraph(false);
+
+function makeDrag(sim){return d3.drag()
+.on("start",(e,d)=>{if(!e.active)sim.alphaTarget(0.25).restart();d.fx=d.x;d.fy=d.y})
+.on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y})
+.on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null})}
+
+function showTip(html,x,y){tooltip.innerHTML=html;tooltip.style.left=Math.min(x+16,innerWidth-440)+"px";tooltip.style.top=Math.min(y+16,innerHeight-140)+"px";tooltip.style.opacity=1}
+function hideTip(){tooltip.style.opacity=0}
+
+principleSel.on("mouseenter",function(e,d){
+d3.select(this).transition().duration(140).attr("r",18);
+const c=clusterById.get(d.cluster);
+showTip('<span class="ref" style="color:'+lighten(c.color,0.4)+'">'+d.label+' — '+d.title+'</span><span class="text">„'+d.text+'"</span><span class="hint">Alte Elberfelder 1905 · Wandeln-Fokus-Edition</span>',e.clientX,e.clientY)})
+.on("mousemove",e=>{tooltip.style.left=Math.min(e.clientX+16,innerWidth-440)+"px";tooltip.style.top=Math.min(e.clientY+16,innerHeight-140)+"px"})
+.on("mouseleave",function(){d3.select(this).transition().duration(140).attr("r",13);hideTip()});
+
+clusterSel.on("mouseenter",function(e,d){
+principleSel.transition().duration(180).attr("opacity",p=>p.cluster===d.id?1:0.12).attr("r",p=>p.cluster===d.id?15:10);
+clusterSel.transition().duration(180).attr("fill-opacity",c=>c.id===d.id?1:0.25);
+labelSel.transition().duration(180).attr("opacity",c=>c.id===d.id?1:0.3);
+edgeSel.transition().duration(180).attr("stroke-opacity",l=>(l.source.id===d.id||l.target.id===d.id)?0.55:0.04);
+const cnt=principleNodes.filter(p=>p.cluster===d.id).length;
+showTip('<span class="ref" style="color:'+lighten(d.color,0.4)+'">'+d.label+'</span><span class="text">'+cnt+' Prinzipien</span>',e.clientX,e.clientY)})
+.on("mousemove",e=>{tooltip.style.left=Math.min(e.clientX+16,innerWidth-440)+"px";tooltip.style.top=Math.min(e.clientY+16,innerHeight-140)+"px"})
+.on("mouseleave",function(){
+principleSel.transition().duration(180).attr("opacity",1).attr("r",13);
+clusterSel.transition().duration(180).attr("fill-opacity",0.85);
+labelSel.transition().duration(180).attr("opacity",1);
+edgeSel.transition().duration(180).attr("stroke-opacity",l=>0.12+l.weight*0.22);hideTip()});
+
+document.getElementById("reset").addEventListener("click",()=>{
+data.nodes.forEach(n=>{n.fx=null;n.fy=null});
+simulation.stop();simulation.alpha(1);
+for(let i=0;i<400;i++)simulation.tick();
+updatePositions();fitGraph(true)});
+
+window.addEventListener("resize",()=>{width=innerWidth;height=innerHeight;simulation.force("center",d3.forceCenter(width/2,height/2));fitGraph(true)});
+</script>
+</body>
+</html>
